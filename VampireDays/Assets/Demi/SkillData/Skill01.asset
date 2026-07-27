@@ -18,7 +18,7 @@ MonoBehaviour:
   normalData:
     enhancementType: 0
     icon: {fileID: 0}
-    description: 
+    description: "\u68FA\u6876\u30D9\u30C3\u30C9\u53EC\u559A"
     coolTime: 1
     duration: 0
     spawnCount: 1
