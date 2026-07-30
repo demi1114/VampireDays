@@ -26,8 +26,8 @@ MonoBehaviour:
     spawnPosition: 0
     forwardDistance: 2
     randomRadius: 3
-    prefab: {fileID: 0}
-    lifeTime: 0
+    prefab: {fileID: 1228495754462396995, guid: ba6e77487edbea645a4b3b63c4133b3c, type: 3}
+    lifeTime: 5
     castEffect: {fileID: 0}
     castSE: {fileID: 0}
     destroySE: {fileID: 0}
