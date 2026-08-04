@@ -11,6 +11,9 @@ public class HumanController : MonoBehaviour
     [Header("–Ú“I’n“’B‹——£")]
     public float arriveDistance = 0.5f;
 
+    [Header("ŒŒ‰tPrefab")]
+    public GameObject bloodPrefab;
+
     /// <summary>
     /// Œ»İ‹zŒŒ‚³‚ê‚Ä‚¢‚é‚©
     /// </summary>
@@ -107,6 +110,22 @@ public class HumanController : MonoBehaviour
     /// </summary>
     public void FinishDrain()
     {
+        if (bloodPrefab != null)
+        {
+            int amount = humanData != null ? humanData.bloodAmount : 1;
+
+            for (int i = 0; i < amount; i++)
+            {
+                Vector3 offset = Random.insideUnitSphere * 0.3f;
+                offset.y = 0f;
+
+                Instantiate(
+                    bloodPrefab,
+                    transform.position + offset,
+                    Quaternion.identity);
+            }
+        }
+
         Destroy(gameObject);
     }
 }

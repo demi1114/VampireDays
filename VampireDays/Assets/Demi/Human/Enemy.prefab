@@ -136,6 +136,7 @@ MonoBehaviour:
   humanData: {fileID: 11400000, guid: c5c6106443e2d1649b05a065383730e5, type: 2}
   moveRadius: 4
   arriveDistance: 0.5
+  bloodPrefab: {fileID: 7565170716384358350, guid: c015d35578994bc4aae9743983aeaad6, type: 3}
 --- !u!54 &-7522355244538336314
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -197,7 +198,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VisionController
   viewDistance: 6
-  lineThreshold: 1
+  lineThreshold: 0.5
   obstacleMask:
     serializedVersion: 2
     m_Bits: 0
