@@ -138,21 +138,6 @@ public class LevelUpManager : MonoBehaviour
         bool success =
             skillManager.ApplySkillChoice(choice);
 
-        if (!success)
-        {
-            Debug.LogWarning(
-                "スキルの適用に失敗しました。"
-            );
-
-            return;
-        }
-
-        Debug.Log(
-            $"スキル選択 : " +
-            $"{choice.skillData.skillName} / " +
-            $"{choice.enhancementType}"
-        );
-
         // レベルアップ画面を閉じる
         CloseLevelUp();
     }

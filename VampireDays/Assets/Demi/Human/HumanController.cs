@@ -128,4 +128,24 @@ public class HumanController : MonoBehaviour
 
         Destroy(gameObject);
     }
+
+    /// <summary>
+    /// ƒoƒbƒg‚ðŒ©‚é
+    /// </summary>
+    public void LookAtBat(Transform bat)
+    {
+        if (bat == null)
+            return;
+
+        Vector3 direction =
+            bat.position - transform.position;
+
+        direction.y = 0f;
+
+        if (direction.sqrMagnitude <= 0.01f)
+            return;
+
+        transform.rotation =
+            Quaternion.LookRotation(direction);
+    }
 }

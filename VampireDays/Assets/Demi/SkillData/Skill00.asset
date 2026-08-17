@@ -19,15 +19,15 @@ MonoBehaviour:
     enhancementType: 0
     icon: {fileID: 21300000, guid: 86729d38d2071124e937bfd75c66e71e, type: 3}
     description: "\u7737\u5C5E\u30D0\u30C3\u30C8\u53EC\u559A"
-    coolTime: 1
-    duration: 1
-    spawnCount: 1
+    coolTime: 5
+    duration: 10
+    spawnCount: 3
     resetChance: 0
     spawnPosition: 0
     forwardDistance: 2
-    randomRadius: 3
+    randomRadius: 8
     prefab: {fileID: 1228495754462396995, guid: ba6e77487edbea645a4b3b63c4133b3c, type: 3}
-    lifeTime: 5
+    lifeTime: 10
     castEffect: {fileID: 0}
     castSE: {fileID: 0}
     destroySE: {fileID: 0}

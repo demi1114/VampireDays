@@ -1,84 +1,189 @@
 using UnityEngine;
 
 /// <summary>
-/// 人間の視線判定を管理する
-/// 赤い直線上にプレイヤーがいる時のみ検知する
-/// 吸血されている本人の視線はゲームオーバー判定から除外する
+/// 人間の視線を管理する
 /// </summary>
 public class VisionController : MonoBehaviour
 {
-    [Header("視線距離")]
-    public float viewDistance = 6f;
+    [Header("視線設定")]
+    [SerializeField]
+    public float viewDistance = 8f;
 
-    [Header("直線判定の許容幅")]
-    public float lineThreshold = 0.1f;
+    [Header("視線表示")]
+    [SerializeField]
+    private LineRenderer visionLine;
 
-    [Header("障害物レイヤー")]
-    public LayerMask obstacleMask;
-
-    private Transform player;
-    private PlayerVampire vampire;
-    private HumanController human;
-
+    /// <summary>
+    /// プレイヤーが現在視線に入っているか
+    /// </summary>
     public bool IsPlayerVisible { get; private set; }
 
-    private void Start()
-    {
-        GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
-        if (playerObject != null)
-        {
-            player = playerObject.transform;
-            vampire = playerObject.GetComponent<PlayerVampire>();
-        }
+    /// <summary>
+    /// 現在視線誘導しているバット
+    /// </summary>
+    private Transform attractedBat;
 
-        human = GetComponent<HumanController>();
-    }
+    /// <summary>
+    /// 視線誘導中か
+    /// </summary>
+    public bool IsAttractedToBat =>
+        attractedBat != null;
+
+
+    //==================================================
+    // 更新
+    //==================================================
 
     private void Update()
     {
+        UpdateVisionDirection();
+
         CheckPlayer();
+
+        UpdateVisionLine();
     }
 
+
+    //==================================================
+    // 視線方向
+    //==================================================
+
+    /// <summary>
+    /// 現在の視線方向を更新
+    /// </summary>
+    private void UpdateVisionDirection()
+    {
+        if (attractedBat != null)
+        {
+            Vector3 direction =
+                attractedBat.position -
+                transform.position;
+
+            direction.y = 0f;
+
+            if (direction.sqrMagnitude > 0.01f)
+            {
+                transform.rotation =
+                    Quaternion.LookRotation(direction);
+            }
+        }
+    }
+
+
+    //==================================================
+    // バット誘導
+    //==================================================
+
+    /// <summary>
+    /// バットへ視線を誘導する
+    /// </summary>
+    public void SetBatAttraction(Transform bat)
+    {
+        attractedBat = bat;
+    }
+
+
+    /// <summary>
+    /// バットによる視線誘導を解除する
+    /// </summary>
+    public void ClearBatAttraction(Transform bat)
+    {
+        // 現在誘導しているバットと同じ場合のみ解除
+        if (attractedBat == bat)
+        {
+            attractedBat = null;
+        }
+    }
+
+
+    //==================================================
+    // プレイヤー検知
+    //==================================================
+
+    /// <summary>
+    /// プレイヤーが直線状の視線に入っているか確認
+    /// </summary>
     private void CheckPlayer()
     {
         IsPlayerVisible = false;
 
+        GameObject player =
+            GameObject.FindGameObjectWithTag("Player");
+
         if (player == null)
             return;
 
-        // 吸血されている本人の視線は無効
-        if (human != null && human.IsBeingDrained)
+        Vector3 origin =
+            transform.position;
+
+        Vector3 direction =
+            transform.forward;
+
+        direction.y = 0f;
+
+        if (direction.sqrMagnitude <= 0.01f)
             return;
 
-        Vector3 origin = transform.position + Vector3.up * 0.5f;
-        Vector3 forward = transform.forward.normalized;
+        direction.Normalize();
 
-        Vector3 toPlayer = player.position - origin;
-        toPlayer.y = 0f;
+        Vector3 playerPosition =
+            player.transform.position;
 
-        float forwardDistance = Vector3.Dot(forward, toPlayer);
+        playerPosition.y = origin.y;
 
-        if (forwardDistance < 0f || forwardDistance > viewDistance)
+        Vector3 toPlayer =
+            playerPosition - origin;
+
+        float distance =
+            toPlayer.magnitude;
+
+        // 視線距離外
+        if (distance > viewDistance)
             return;
 
-        Vector3 projectedPoint = forward * forwardDistance;
-        float offset = (toPlayer - projectedPoint).magnitude;
+        toPlayer.Normalize();
 
-        if (offset > lineThreshold)
+        // 直線上にいるか
+        float dot =
+            Vector3.Dot(direction, toPlayer);
+
+        // ほぼ真正面にいる場合のみ検知
+        if (dot < 0.98f)
             return;
 
-        if (Physics.Raycast(origin, forward, out RaycastHit hit, viewDistance, obstacleMask))
+        // 障害物がないか確認
+        if (Physics.Raycast(
+            origin,
+            direction,
+            out RaycastHit hit,
+            viewDistance))
         {
-            if (!hit.collider.CompareTag("Player"))
-                return;
+            if (hit.collider.CompareTag("Player"))
+            {
+                IsPlayerVisible = true;
+            }
         }
+    }
 
-        IsPlayerVisible = true;
 
-        // 吸血中に見られたらゲームオーバー
-        if (vampire != null && vampire.IsDraining)
-        {
-            GameManager.Instance.GameOver();
-        }
+    //==================================================
+    // 視線表示
+    //==================================================
+
+    private void UpdateVisionLine()
+    {
+        if (visionLine == null)
+            return;
+
+        Vector3 start =
+            transform.position;
+
+        Vector3 end =
+            start +
+            transform.forward *
+            viewDistance;
+
+        visionLine.SetPosition(0, start);
+        visionLine.SetPosition(1, end);
     }
 }
