@@ -7,9 +7,10 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
 
-    /// <summary>
-    /// ゲームの状態
-    /// </summary>
+    //==================================================
+    // ゲーム状態
+    //==================================================
+
     public enum GameState
     {
         Playing,
@@ -18,24 +19,42 @@ public class GameManager : MonoBehaviour
         GameClear
     }
 
-    [Header("制限時間（秒）")]
-    public float gameTime = 300f;
+    public GameState State { get; private set; }
 
-    [Header("時間経過ダメージ（1秒あたり）")]
-    public float damagePerSecond = 2f;
 
-    /// <summary>
-    /// 現在のゲーム状態
-    /// </summary>
-    public GameState State { get; private set; } = GameState.Playing;
+    //==================================================
+    // ゲーム設定
+    //==================================================
 
-    /// <summary>
-    /// 現在の残り時間
-    /// </summary>
-    public float CurrentTime => currentTime;
+    [Header("制限時間")]
+    [SerializeField]
+    private float gameTime = 300f;
+
+    [Header("時間経過ダメージ")]
+    [SerializeField]
+    private float damagePerSecond = 2f;
+
+
+    //==================================================
+    // 時間
+    //==================================================
 
     private float currentTime;
+
+    public float CurrentTime => currentTime;
+
+
+    //==================================================
+    // プレイヤー
+    //==================================================
+
     private PlayerStatus player;
+    private PlayerVampire vampire;
+
+
+    //==================================================
+    // 初期化
+    //==================================================
 
     private void Awake()
     {
@@ -49,49 +68,178 @@ public class GameManager : MonoBehaviour
             return;
         }
 
+        State = GameState.Playing;
+
         currentTime = gameTime;
+
         Time.timeScale = 1f;
     }
 
     private void Start()
     {
-        player = FindFirstObjectByType<PlayerStatus>();
+        FindPlayer();
     }
+
+
+    private void FindPlayer()
+    {
+        player = FindFirstObjectByType<PlayerStatus>();
+        vampire = FindFirstObjectByType<PlayerVampire>();
+    }
+
+
+    //==================================================
+    // 更新
+    //==================================================
 
     private void Update()
     {
         if (State != GameState.Playing)
             return;
 
-        if (player == null)
+        if (player == null || vampire == null)
+        {
+            FindPlayer();
+
+            if (player == null || vampire == null)
+                return;
+        }
+
+        // 時間更新
+        UpdateGameTime();
+
+        // 時間経過ダメージ
+        UpdateTimeDamage();
+
+        // GameOver判定
+        CheckGameOver();
+
+        if (State != GameState.Playing)
             return;
 
-        // 制限時間更新
+        // GameClear判定
+        CheckGameClear();
+    }
+
+
+    //==================================================
+    // 時間
+    //==================================================
+
+    private void UpdateGameTime()
+    {
         currentTime -= Time.deltaTime;
 
         if (currentTime < 0f)
             currentTime = 0f;
+    }
 
-        // 時間経過ダメージ
-        player.Damage(damagePerSecond * Time.deltaTime);
 
-        // HP0でゲームオーバー
+    //==================================================
+    // 時間経過ダメージ
+    //==================================================
+
+    private void UpdateTimeDamage()
+    {
+        if (damagePerSecond <= 0f)
+            return;
+
+        player.Damage(
+            damagePerSecond * Time.deltaTime
+        );
+    }
+
+
+    //==================================================
+    // GameOver判定
+    //==================================================
+
+    private void CheckGameOver()
+    {
+        //==============================================
+        // ① HPが0
+        //==============================================
+
         if (player.IsDead())
         {
             GameOver();
             return;
         }
 
-        // 時間切れでゲームクリア
+
+        //==============================================
+        // ② 吸血中でなければ視線判定不要
+        //==============================================
+
+        if (!vampire.IsDraining)
+            return;
+
+
+        //==============================================
+        // ③ 全人間の視線を確認
+        //==============================================
+
+        VisionController[] visions =
+            FindObjectsByType<VisionController>(
+                FindObjectsSortMode.None
+            );
+
+        foreach (VisionController vision in visions)
+        {
+            if (vision == null)
+                continue;
+
+
+            //==========================================
+            // 吸血対象自身の視線を除外
+            //==========================================
+
+            HumanController visionHuman =
+                vision.GetComponent<HumanController>();
+
+            if (visionHuman != null &&
+                visionHuman == vampire.CurrentDrainTarget)
+            {
+                continue;
+            }
+
+
+            //==========================================
+            // 他の人間の視線
+            //==========================================
+
+            if (!vision.IsPlayerVisible)
+                continue;
+
+
+            Debug.Log(
+                "吸血中に別の人間の視線に発見されました！"
+            );
+
+            GameOver();
+
+            return;
+        }
+    }
+
+
+    //==================================================
+    // GameClear
+    //==================================================
+
+    private void CheckGameClear()
+    {
         if (currentTime <= 0f)
         {
             GameClear();
         }
     }
 
-    /// <summary>
-    /// ゲームオーバー
-    /// </summary>
+
+    //==================================================
+    // GameOver
+    //==================================================
+
     public void GameOver()
     {
         if (State != GameState.Playing)
@@ -104,9 +252,11 @@ public class GameManager : MonoBehaviour
         Time.timeScale = 0f;
     }
 
-    /// <summary>
-    /// ゲームクリア
-    /// </summary>
+
+    //==================================================
+    // GameClear
+    //==================================================
+
     public void GameClear()
     {
         if (State != GameState.Playing)
@@ -119,37 +269,49 @@ public class GameManager : MonoBehaviour
         Time.timeScale = 0f;
     }
 
-    /// <summary>
-    /// 一時停止
-    /// </summary>
+
+    //==================================================
+    // Pause
+    //==================================================
+
     public void Pause()
     {
         if (State != GameState.Playing)
             return;
 
         State = GameState.Paused;
+
         Time.timeScale = 0f;
     }
 
-    /// <summary>
-    /// 一時停止解除
-    /// </summary>
+
+    //==================================================
+    // Resume
+    //==================================================
+
     public void Resume()
     {
         if (State != GameState.Paused)
             return;
 
         State = GameState.Playing;
+
         Time.timeScale = 1f;
     }
 
-    /// <summary>
-    /// ゲームリセット（将来シーンリロード用）
-    /// </summary>
+
+    //==================================================
+    // リセット
+    //==================================================
+
     public void ResetGame()
     {
         State = GameState.Playing;
+
         currentTime = gameTime;
+
+        FindPlayer();
+
         Time.timeScale = 1f;
     }
 }

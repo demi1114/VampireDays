@@ -2,21 +2,43 @@ using UnityEngine;
 
 /// <summary>
 /// 人間の視線を管理する
+///
+/// ・視線は直線
+/// ・一定距離内のみプレイヤーを検知
+/// ・バットによる視線誘導に対応
+/// ・現在吸血されている人間の視線はGameOver判定から除外
 /// </summary>
 public class VisionController : MonoBehaviour
 {
+    //==================================================
+    // 視線設定
+    //==================================================
+
     [Header("視線設定")]
+    [Tooltip("視線が届く最大距離")]
     [SerializeField]
     public float viewDistance = 8f;
 
-    [Header("視線表示")]
-    [SerializeField]
-    private LineRenderer visionLine;
+    /// <summary>
+    /// 外部から視線距離を取得
+    /// </summary>
+    public float ViewDistance =>
+        viewDistance;
+
+
+    //==================================================
+    // プレイヤー検知
+    //==================================================
 
     /// <summary>
     /// プレイヤーが現在視線に入っているか
     /// </summary>
     public bool IsPlayerVisible { get; private set; }
+
+
+    //==================================================
+    // バット誘導
+    //==================================================
 
     /// <summary>
     /// 現在視線誘導しているバット
@@ -24,10 +46,30 @@ public class VisionController : MonoBehaviour
     private Transform attractedBat;
 
     /// <summary>
-    /// 視線誘導中か
+    /// バットによる視線誘導中か
     /// </summary>
     public bool IsAttractedToBat =>
         attractedBat != null;
+
+
+    //==================================================
+    // HumanController
+    //==================================================
+
+    private HumanController human;
+
+
+    //==================================================
+    // 初期化
+    //==================================================
+
+    private void Awake()
+    {
+        human =
+            GetComponent<HumanController>();
+
+        IsPlayerVisible = false;
+    }
 
 
     //==================================================
@@ -39,8 +81,43 @@ public class VisionController : MonoBehaviour
         UpdateVisionDirection();
 
         CheckPlayer();
+    }
 
-        UpdateVisionLine();
+
+    //==================================================
+    // バットによる視線誘導
+    //==================================================
+
+    /// <summary>
+    /// バットへ視線を誘導する
+    /// </summary>
+    public void SetBatAttraction(Transform bat)
+    {
+        if (bat == null)
+            return;
+
+        attractedBat = bat;
+    }
+
+
+    /// <summary>
+    /// 指定されたバットによる視線誘導を解除
+    /// </summary>
+    public void ClearBatAttraction(Transform bat)
+    {
+        if (attractedBat == bat)
+        {
+            attractedBat = null;
+        }
+    }
+
+
+    /// <summary>
+    /// 視線誘導を強制解除
+    /// </summary>
+    public void ClearBatAttraction()
+    {
+        attractedBat = null;
     }
 
 
@@ -49,50 +126,27 @@ public class VisionController : MonoBehaviour
     //==================================================
 
     /// <summary>
-    /// 現在の視線方向を更新
+    /// 視線方向を更新
+    ///
+    /// バット誘導時のみ人間を回転させる。
+    /// 吸血対象になったことによる回転は行わない。
     /// </summary>
     private void UpdateVisionDirection()
     {
-        if (attractedBat != null)
-        {
-            Vector3 direction =
-                attractedBat.position -
-                transform.position;
+        if (attractedBat == null)
+            return;
 
-            direction.y = 0f;
+        Vector3 direction =
+            attractedBat.position -
+            transform.position;
 
-            if (direction.sqrMagnitude > 0.01f)
-            {
-                transform.rotation =
-                    Quaternion.LookRotation(direction);
-            }
-        }
-    }
+        direction.y = 0f;
 
+        if (direction.sqrMagnitude <= 0.01f)
+            return;
 
-    //==================================================
-    // バット誘導
-    //==================================================
-
-    /// <summary>
-    /// バットへ視線を誘導する
-    /// </summary>
-    public void SetBatAttraction(Transform bat)
-    {
-        attractedBat = bat;
-    }
-
-
-    /// <summary>
-    /// バットによる視線誘導を解除する
-    /// </summary>
-    public void ClearBatAttraction(Transform bat)
-    {
-        // 現在誘導しているバットと同じ場合のみ解除
-        if (attractedBat == bat)
-        {
-            attractedBat = null;
-        }
+        transform.rotation =
+            Quaternion.LookRotation(direction);
     }
 
 
@@ -101,7 +155,7 @@ public class VisionController : MonoBehaviour
     //==================================================
 
     /// <summary>
-    /// プレイヤーが直線状の視線に入っているか確認
+    /// プレイヤーが直線状の視線に入っているか確認する
     /// </summary>
     private void CheckPlayer()
     {
@@ -113,8 +167,18 @@ public class VisionController : MonoBehaviour
         if (player == null)
             return;
 
+
+        //==============================================
+        // 視線開始位置
+        //==============================================
+
         Vector3 origin =
             transform.position;
+
+
+        //==============================================
+        // 視線方向
+        //==============================================
 
         Vector3 direction =
             transform.forward;
@@ -126,10 +190,17 @@ public class VisionController : MonoBehaviour
 
         direction.Normalize();
 
+
+        //==============================================
+        // プレイヤー位置
+        //==============================================
+
         Vector3 playerPosition =
             player.transform.position;
 
-        playerPosition.y = origin.y;
+        playerPosition.y =
+            origin.y;
+
 
         Vector3 toPlayer =
             playerPosition - origin;
@@ -137,21 +208,39 @@ public class VisionController : MonoBehaviour
         float distance =
             toPlayer.magnitude;
 
-        // 視線距離外
+
+        //==============================================
+        // 距離チェック
+        //==============================================
+
         if (distance > viewDistance)
+            return;
+
+        if (distance <= 0.01f)
             return;
 
         toPlayer.Normalize();
 
-        // 直線上にいるか
-        float dot =
-            Vector3.Dot(direction, toPlayer);
 
-        // ほぼ真正面にいる場合のみ検知
+        //==============================================
+        // 直線上にいるか
+        //==============================================
+
+        float dot =
+            Vector3.Dot(
+                direction,
+                toPlayer
+            );
+
+        // ほぼ真正面のみ
         if (dot < 0.98f)
             return;
 
-        // 障害物がないか確認
+
+        //==============================================
+        // 障害物チェック
+        //==============================================
+
         if (Physics.Raycast(
             origin,
             direction,
@@ -163,27 +252,5 @@ public class VisionController : MonoBehaviour
                 IsPlayerVisible = true;
             }
         }
-    }
-
-
-    //==================================================
-    // 視線表示
-    //==================================================
-
-    private void UpdateVisionLine()
-    {
-        if (visionLine == null)
-            return;
-
-        Vector3 start =
-            transform.position;
-
-        Vector3 end =
-            start +
-            transform.forward *
-            viewDistance;
-
-        visionLine.SetPosition(0, start);
-        visionLine.SetPosition(1, end);
     }
 }

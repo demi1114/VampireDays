@@ -3,7 +3,8 @@ using UnityEngine;
 [RequireComponent(typeof(LineRenderer))]
 public class VisionVisualizer : MonoBehaviour
 {
-    public VisionController vision;
+    [SerializeField]
+    private VisionController vision;
 
     private LineRenderer line;
 
@@ -22,8 +23,14 @@ public class VisionVisualizer : MonoBehaviour
         if (vision == null)
             return;
 
-        Vector3 origin = transform.position + Vector3.up * 0.05f;
-        Vector3 end = origin + transform.forward * vision.viewDistance;
+        Vector3 origin =
+            transform.position +
+            Vector3.up * 0.05f;
+
+        Vector3 end =
+            origin +
+            transform.forward *
+            vision.viewDistance;
 
         line.SetPosition(0, origin);
         line.SetPosition(1, end);

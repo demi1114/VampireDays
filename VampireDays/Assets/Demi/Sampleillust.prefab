@@ -104,6 +104,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BatSkillObject
   moveSpeed: 7
-  directionChangeInterval: 1
   moveRange: 5
-  attractionRange: 6
+  arrivalDistance: 0.2
+  attractionRange: 3

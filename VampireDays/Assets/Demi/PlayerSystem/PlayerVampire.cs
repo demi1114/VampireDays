@@ -14,12 +14,24 @@ public class PlayerVampire : MonoBehaviour
 
     private float currentDrainTime;
 
-    public bool IsDraining => currentHuman != null;
+    /// <summary>
+    /// Œ»İ‹zŒŒ’†‚©
+    /// </summary>
+    public bool IsDraining =>
+        currentHuman != null;
+
+    /// <summary>
+    /// Œ»İ‹zŒŒ‚µ‚Ä‚¢‚élŠÔ
+    /// </summary>
+    public HumanController CurrentDrainTarget =>
+        currentHuman;
+
 
     private void Awake()
     {
         status = GetComponent<PlayerStatus>();
     }
+
 
     private void Update()
     {
@@ -34,30 +46,40 @@ public class PlayerVampire : MonoBehaviour
         }
     }
 
+
     private void OnTriggerEnter(Collider other)
     {
+        // ‚·‚Å‚É‹zŒŒ’†
         if (currentHuman != null)
             return;
 
+        // HumanˆÈŠO
         if (!other.CompareTag("Human"))
             return;
 
-        HumanController human = other.GetComponent<HumanController>();
+        HumanController human =
+            other.GetComponent<HumanController>();
 
         if (human == null)
             return;
 
+        // ‚·‚Å‚É•Ê‚ÌƒvƒŒƒCƒ„[“™‚©‚ç‹zŒŒ‚³‚ê‚Ä‚¢‚é
         if (human.IsBeingDrained)
             return;
 
+        // ‹zŒŒŠJn
         currentHuman = human;
         currentDrainTime = 0f;
 
         human.BeginDrain();
     }
 
+
     private void FinishDrain()
     {
+        if (currentHuman == null)
+            return;
+
         status.Heal(healAmount);
 
         currentHuman.FinishDrain();
