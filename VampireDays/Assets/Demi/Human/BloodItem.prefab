@@ -124,7 +124,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 78e244c2d029daf409fc6783b6ab4b02, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BloodItem
-  bloodAmount: 3
+  bloodAmount: 1
   rotateSpeed: 90
   floatHeight: 0.5
   floatSpeed: 5
+  attractSpeed: 8

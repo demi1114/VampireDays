@@ -8,29 +8,39 @@ using UnityEngine.UI;
 public class GameUI : MonoBehaviour
 {
     [Header("HP")]
-    public Slider hpSlider;
+    [SerializeField]
+    private Slider hpSlider;
 
     [Header("時間")]
-    public TextMeshProUGUI timeText;
+    [SerializeField]
+    private TextMeshProUGUI timeText;
 
     [Header("人間数")]
-    public TextMeshProUGUI humanCountText;
+    [SerializeField]
+    private TextMeshProUGUI humanCountText;
 
     [Header("視線検知")]
-    public TextMeshProUGUI visionText;
+    [SerializeField]
+    private TextMeshProUGUI visionText;
 
     [Header("吸血状態")]
-    public TextMeshProUGUI drainText;
+    [SerializeField]
+    private TextMeshProUGUI drainText;
 
     [Header("レベル")]
-    public TextMeshProUGUI levelText;
+    [SerializeField]
+    private TextMeshProUGUI levelText;
 
     [Header("血液")]
-    public TextMeshProUGUI bloodText;
+    [SerializeField]
+    private TextMeshProUGUI bloodText;
 
     [Header("ゲーム終了UI")]
-    public GameObject gameOverPanel;
-    public GameObject gameClearPanel;
+    [SerializeField]
+    private GameObject gameOverPanel;
+
+    [SerializeField]
+    private GameObject gameClearPanel;
 
     private PlayerStatus player;
     private PlayerVampire vampire;
@@ -38,10 +48,12 @@ public class GameUI : MonoBehaviour
 
     private void Start()
     {
+        // プレイヤー関連コンポーネント取得
         player = FindFirstObjectByType<PlayerStatus>();
         vampire = FindFirstObjectByType<PlayerVampire>();
         level = FindFirstObjectByType<PlayerLevel>();
 
+        // ゲーム終了UIは最初は非表示
         if (gameOverPanel != null)
             gameOverPanel.SetActive(false);
 
@@ -96,7 +108,8 @@ public class GameUI : MonoBehaviour
         if (humanCountText == null || HumanManager.Instance == null)
             return;
 
-        humanCountText.text = $"Humans : {HumanManager.Instance.HumanCount}";
+        humanCountText.text =
+            $"Humans : {HumanManager.Instance.HumanCount}";
     }
 
     /// <summary>
@@ -107,12 +120,18 @@ public class GameUI : MonoBehaviour
         if (visionText == null)
             return;
 
-        VisionController[] visions = FindObjectsByType<VisionController>(FindObjectsSortMode.None);
+        VisionController[] visions =
+            FindObjectsByType<VisionController>(
+                FindObjectsSortMode.None
+            );
 
         bool detected = false;
 
         foreach (VisionController vision in visions)
         {
+            if (vision == null)
+                continue;
+
             if (vision.IsPlayerVisible)
             {
                 detected = true;
@@ -131,7 +150,8 @@ public class GameUI : MonoBehaviour
         if (drainText == null || vampire == null)
             return;
 
-        drainText.text = vampire.IsDraining ? "Draining..." : "";
+        drainText.text =
+            vampire.IsDraining ? "Draining..." : "";
     }
 
     /// <summary>
@@ -142,11 +162,18 @@ public class GameUI : MonoBehaviour
         if (level == null)
             return;
 
+        // レベル
         if (levelText != null)
-            levelText.text = $"Lv {level.level}";
+        {
+            levelText.text = $"Lv {level.Level}";
+        }
 
+        // 血液
         if (bloodText != null)
-            bloodText.text = $"Blood : {level.currentBlood}/{level.requiredBlood}";
+        {
+            bloodText.text =
+                $"Blood : {level.CurrentBlood}/{level.RequiredBlood}";
+        }
     }
 
     /// <summary>
@@ -158,9 +185,19 @@ public class GameUI : MonoBehaviour
             return;
 
         if (gameOverPanel != null)
-            gameOverPanel.SetActive(GameManager.Instance.State == GameManager.GameState.GameOver);
+        {
+            gameOverPanel.SetActive(
+                GameManager.Instance.State ==
+                GameManager.GameState.GameOver
+            );
+        }
 
         if (gameClearPanel != null)
-            gameClearPanel.SetActive(GameManager.Instance.State == GameManager.GameState.GameClear);
+        {
+            gameClearPanel.SetActive(
+                GameManager.Instance.State ==
+                GameManager.GameState.GameClear
+            );
+        }
     }
 }

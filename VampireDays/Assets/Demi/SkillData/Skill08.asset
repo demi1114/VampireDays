@@ -17,7 +17,7 @@ MonoBehaviour:
   skillType: 2
   normalData:
     enhancementType: 0
-    icon: {fileID: 0}
+    icon: {fileID: 21300000, guid: 86729d38d2071124e937bfd75c66e71e, type: 3}
     description: "\u59CB\u7956\u306E\u9BAE\u8840"
     coolTime: 1
     duration: 0

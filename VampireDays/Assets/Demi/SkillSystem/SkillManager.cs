@@ -1,205 +1,301 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-/// プレイヤーが所持するスキルを管理
+/// <summary>
+/// プレイヤーのスキルを管理する
+/// </summary>
 public class SkillManager : MonoBehaviour
 {
-    [Header("Skill Database")]
+    [Header("スキルデータベース")]
     [SerializeField]
     private SkillDatabase skillDatabase;
 
-    [Header("カーソル")]
-    [SerializeField]
-    private Transform cursorTransform;
+    /// <summary>
+    /// 現在所持しているスキル
+    /// </summary>
+    private readonly List<RuntimeSkill> currentSkills = new();
 
-    /// 所持スキル
-    private readonly List<RuntimeSkill> ownedSkills = new();
+    /// <summary>
+    /// 所持スキル一覧
+    /// </summary>
+    public IReadOnlyList<RuntimeSkill> CurrentSkills =>
+        currentSkills;
 
-    private AudioSource audioSource;
 
-    private void Awake()
+    //==================================================
+    // 所持スキル
+    //==================================================
+
+    /// <summary>
+    /// スキルを所持しているか
+    /// </summary>
+    public bool HasSkill(SkillData skillData)
     {
-        audioSource = GetComponent<AudioSource>();
-
-        if (audioSource == null)
-            audioSource = gameObject.AddComponent<AudioSource>();
-    }
-
-    private void Update()
-    {
-        UpdateCooldown();
-    }
-
-    /// CT更新
-    private void UpdateCooldown()
-    {
-        foreach (RuntimeSkill runtime in ownedSkills)
-        {
-            // 強化系は常時発動
-            if (runtime.skillData.skillType == SkillType.Passive)
-                continue;
-
-            runtime.currentCoolTime -= Time.deltaTime;
-
-            if (runtime.currentCoolTime <= 0f)
-            {
-                ExecuteSkill(runtime);
-
-                runtime.currentCoolTime = runtime.Variant.coolTime;
-            }
-        }
-    }
-
-    /// スキル発動
-    private void ExecuteSkill(RuntimeSkill runtime)
-    {
-        SkillVariantData variant = runtime.Variant;
-
-        Vector3 spawnPosition = GetSpawnPosition(variant);
-
-        // 発動エフェクト
-        if (variant.castEffect != null)
-        {
-            Instantiate(
-                variant.castEffect,
-                spawnPosition,
-                Quaternion.identity);
-        }
-
-        // 発動SE
-        if (variant.castSE != null)
-        {
-            audioSource.PlayOneShot(variant.castSE);
-        }
-
-        // オブジェクト生成
-        if (variant.prefab == null)
-            return;
-
-        for (int i = 0; i < variant.spawnCount; i++)
-        {
-            GameObject obj =
-                Instantiate(
-                    variant.prefab,
-                    spawnPosition,
-                    Quaternion.identity);
-
-            // 初期化
-            ISkillObject skillObject =
-                obj.GetComponent<ISkillObject>();
-
-            if (skillObject != null)
-            {
-                skillObject.Initialize(runtime);
-            }
-
-            // 自動削除
-            if (variant.lifeTime > 0f)
-            {
-                Destroy(obj, variant.lifeTime);
-            }
-        }
-    }
-
-    /// スポーン位置取得
-    private Vector3 GetSpawnPosition(SkillVariantData variant)
-    {
-        switch (variant.spawnPosition)
-        {
-            case SpawnPositionType.Player:
-
-                return transform.position;
-
-            case SpawnPositionType.Cursor:
-
-                if (cursorTransform != null)
-                    return cursorTransform.position;
-
-                return transform.position;
-
-            case SpawnPositionType.Forward:
-
-                return transform.position +
-                       transform.up * variant.forwardDistance;
-
-            case SpawnPositionType.RandomAround:
-
-                Vector2 random =
-                    Random.insideUnitCircle *
-                    variant.randomRadius;
-
-                return transform.position +
-                       new Vector3(random.x, random.y);
-
-            default:
-
-                return transform.position;
-        }
-    }
-
-    /// スキル取得
-    public bool AddSkill(int id)
-    {
-        SkillData data = skillDatabase.GetSkill(id);
-
-        if (data == null)
+        if (skillData == null)
             return false;
 
-        if (HasSkill(id))
-            return false;
-
-        ownedSkills.Add(new RuntimeSkill(data));
-
-        return true;
-    }
-
-    /// スキル削除
-    public bool RemoveSkill(int id)
-    {
-        RuntimeSkill runtime = GetRuntimeSkill(id);
-
-        if (runtime == null)
-            return false;
-
-        ownedSkills.Remove(runtime);
-
-        return true;
-    }
-
-    /// 強化変更
-    public void ChangeEnhancement(
-        int id,
-        EnhancementType type)
-    {
-        RuntimeSkill runtime = GetRuntimeSkill(id);
-
-        if (runtime == null)
-            return;
-
-        runtime.ChangeEnhancement(type);
-    }
-
-    /// 所持判定
-    public bool HasSkill(int id)
-    {
-        return GetRuntimeSkill(id) != null;
-    }
-
-    /// RuntimeSkill取得
-    private RuntimeSkill GetRuntimeSkill(int id)
-    {
-        foreach (RuntimeSkill runtime in ownedSkills)
+        foreach (RuntimeSkill skill in currentSkills)
         {
-            if (runtime.skillData.id == id)
-                return runtime;
+            if (skill.skillData == skillData)
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// RuntimeSkillを取得
+    /// </summary>
+    public RuntimeSkill GetRuntimeSkill(SkillData skillData)
+    {
+        if (skillData == null)
+            return null;
+
+        foreach (RuntimeSkill skill in currentSkills)
+        {
+            if (skill.skillData == skillData)
+                return skill;
         }
 
         return null;
     }
 
-    /// 所持スキル一覧取得
-    public IReadOnlyList<RuntimeSkill> GetOwnedSkills()
+
+    //==================================================
+    // スキル取得
+    //==================================================
+
+    /// <summary>
+    /// 新しいスキルを取得
+    /// </summary>
+    public bool AcquireSkill(SkillData skillData)
     {
-        return ownedSkills;
+        if (skillData == null)
+            return false;
+
+        // すでに所持している場合は取得できない
+        if (HasSkill(skillData))
+            return false;
+
+        RuntimeSkill runtimeSkill =
+            new RuntimeSkill(skillData);
+
+        currentSkills.Add(runtimeSkill);
+
+        Debug.Log(
+            $"スキル取得 : {skillData.skillName}"
+        );
+
+        return true;
+    }
+
+
+    //==================================================
+    // 強化
+    //==================================================
+
+    /// <summary>
+    /// 所持スキルの強化形態を変更
+    /// </summary>
+    public bool ChangeEnhancement(
+        SkillData skillData,
+        EnhancementType enhancementType)
+    {
+        RuntimeSkill runtimeSkill =
+            GetRuntimeSkill(skillData);
+
+        if (runtimeSkill == null)
+            return false;
+
+        SkillVariantData variant =
+            skillData.GetVariant(enhancementType);
+
+        if (variant == null)
+            return false;
+
+        runtimeSkill.ChangeEnhancement(
+            enhancementType
+        );
+
+        Debug.Log(
+            $"スキル変更 : " +
+            $"{skillData.skillName} → " +
+            $"{enhancementType}"
+        );
+
+        return true;
+    }
+
+
+    //==================================================
+    // 抽選候補作成
+    //==================================================
+
+    /// <summary>
+    /// 現在の状態から抽選可能な全候補を作成
+    /// </summary>
+    public List<SkillChoiceData> CreateChoicePool()
+    {
+        List<SkillChoiceData> pool = new();
+
+        if (skillDatabase == null)
+            return pool;
+
+        IReadOnlyList<SkillData> allSkills =
+            skillDatabase.GetAllSkills();
+
+        foreach (SkillData skillData in allSkills)
+        {
+            if (skillData == null)
+                continue;
+
+            //==========================================
+            // 未所持スキル
+            //==========================================
+
+            if (!HasSkill(skillData))
+            {
+                // 未所持スキルはNormalのみ候補
+                if (skillData.HasVariant(
+                    EnhancementType.Normal))
+                {
+                    pool.Add(
+                        new SkillChoiceData(
+                            skillData,
+                            EnhancementType.Normal
+                        )
+                    );
+                }
+
+                continue;
+            }
+
+            //==========================================
+            // 所持スキル
+            //==========================================
+
+            RuntimeSkill runtimeSkill =
+                GetRuntimeSkill(skillData);
+
+            if (runtimeSkill == null)
+                continue;
+
+            EnhancementType currentType =
+                runtimeSkill.enhancementType;
+
+            // 所持スキルの別強化形態を候補にする
+            foreach (
+                EnhancementType type
+                in System.Enum.GetValues(
+                    typeof(EnhancementType)))
+            {
+                // Normalは新規取得用なので除外
+                if (type == EnhancementType.Normal)
+                    continue;
+
+                // 現在使用中の形態は除外
+                if (type == currentType)
+                    continue;
+
+                // 実際に存在する強化形態だけ候補にする
+                if (skillData.HasVariant(type))
+                {
+                    pool.Add(
+                        new SkillChoiceData(
+                            skillData,
+                            type
+                        )
+                    );
+                }
+            }
+        }
+
+        return pool;
+    }
+
+
+    //==================================================
+    // ランダム抽選
+    //==================================================
+
+    /// <summary>
+    /// 抽選可能候補からランダムに指定数取得
+    /// </summary>
+    public List<SkillChoiceData> DrawSkillChoices(
+        int count = 3)
+    {
+        List<SkillChoiceData> pool =
+            CreateChoicePool();
+
+        List<SkillChoiceData> result = new();
+
+        // 候補数より多く要求しない
+        count = Mathf.Min(
+            count,
+            pool.Count
+        );
+
+        // Fisher-Yatesシャッフル
+        for (int i = pool.Count - 1; i > 0; i--)
+        {
+            int randomIndex =
+                Random.Range(0, i + 1);
+
+            SkillChoiceData temp =
+                pool[i];
+
+            pool[i] =
+                pool[randomIndex];
+
+            pool[randomIndex] =
+                temp;
+        }
+
+        // 必要数だけ取得
+        for (int i = 0; i < count; i++)
+        {
+            result.Add(pool[i]);
+        }
+
+        return result;
+    }
+
+
+    //==================================================
+    // 選択確定
+    //==================================================
+
+    /// <summary>
+    /// レベルアップ画面で選択された候補を適用
+    /// </summary>
+    public bool ApplySkillChoice(
+        SkillChoiceData choice)
+    {
+        if (choice == null ||
+            choice.skillData == null)
+        {
+            return false;
+        }
+
+        //==========================================
+        // 新規取得
+        //==========================================
+
+        if (choice.enhancementType ==
+            EnhancementType.Normal)
+        {
+            return AcquireSkill(
+                choice.skillData
+            );
+        }
+
+        //==========================================
+        // 強化形態変更
+        //==========================================
+
+        return ChangeEnhancement(
+            choice.skillData,
+            choice.enhancementType
+        );
     }
 }

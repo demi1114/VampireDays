@@ -10,8 +10,14 @@ public class BloodCollector : MonoBehaviour
     private void Awake()
     {
         level = GetComponent<PlayerLevel>();
-    }
 
+        if (level == null)
+        {
+            Debug.LogError(
+                "BloodCollector : ìØÇ∂GameObjectÇ…PlayerLevelÇ™Ç†ÇËÇ‹ÇπÇÒÅB"
+            );
+        }
+    }
     private void Update()
     {
         Collider[] hits = Physics.OverlapSphere(transform.position, collectRadius);

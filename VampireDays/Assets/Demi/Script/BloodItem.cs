@@ -58,6 +58,7 @@ public class BloodItem : MonoBehaviour
         attracting = true;
         target = player;
         targetLevel = level;
+
     }
 
     private void Collect()
