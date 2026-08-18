@@ -176,7 +176,7 @@ public class SkillChoiceUI : MonoBehaviour
             else
             {
                 slot.coolTimeText.text =
-                    $"CT : {variant.coolTime:0.0}s";
+                    $"{variant.coolTime:0.0}•b";
             }
         }
 
@@ -190,7 +190,7 @@ public class SkillChoiceUI : MonoBehaviour
             if (variant.duration > 0f)
             {
                 slot.durationText.text =
-                    $"Duration : {variant.duration:0.0}s";
+                    $"{variant.duration:0.0}•b";
             }
             else
             {
@@ -208,7 +208,7 @@ public class SkillChoiceUI : MonoBehaviour
             if (variant.spawnCount > 0)
             {
                 slot.spawnCountText.text =
-                    $"Count : {variant.spawnCount}";
+                    $"{variant.spawnCount}";
             }
             else
             {

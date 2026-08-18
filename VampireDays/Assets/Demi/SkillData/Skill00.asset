@@ -19,7 +19,7 @@ MonoBehaviour:
     enhancementType: 0
     icon: {fileID: 21300000, guid: 86729d38d2071124e937bfd75c66e71e, type: 3}
     description: "\u7737\u5C5E\u30D0\u30C3\u30C8\u53EC\u559A"
-    coolTime: 5
+    coolTime: 10
     duration: 10
     spawnCount: 3
     resetChance: 0
@@ -32,18 +32,63 @@ MonoBehaviour:
     castSE: {fileID: 0}
     destroySE: {fileID: 0}
   enhancementList:
-  - enhancementType: 0
+  - enhancementType: 1
     icon: {fileID: 21300000, guid: 86729d38d2071124e937bfd75c66e71e, type: 3}
-    description: 
-    coolTime: 0
-    duration: 0
-    spawnCount: 0
+    description: "\u30A8\u30E1\u30E9\u30EB\u30C9"
+    coolTime: 15
+    duration: 10
+    spawnCount: 5
     resetChance: 0
     spawnPosition: 0
-    forwardDistance: 0
-    randomRadius: 0
-    prefab: {fileID: 0}
-    lifeTime: 0
+    forwardDistance: 2
+    randomRadius: 8
+    prefab: {fileID: 1228495754462396995, guid: ba6e77487edbea645a4b3b63c4133b3c, type: 3}
+    lifeTime: 10
+    castEffect: {fileID: 0}
+    castSE: {fileID: 0}
+    destroySE: {fileID: 0}
+  - enhancementType: 2
+    icon: {fileID: 21300000, guid: 86729d38d2071124e937bfd75c66e71e, type: 3}
+    description: "\u30B5\u30D5\u30A1\u30A4\u30A2"
+    coolTime: 3
+    duration: 10
+    spawnCount: 2
+    resetChance: 0
+    spawnPosition: 0
+    forwardDistance: 2
+    randomRadius: 8
+    prefab: {fileID: 1228495754462396995, guid: ba6e77487edbea645a4b3b63c4133b3c, type: 3}
+    lifeTime: 10
+    castEffect: {fileID: 0}
+    castSE: {fileID: 0}
+    destroySE: {fileID: 0}
+  - enhancementType: 3
+    icon: {fileID: 21300000, guid: 86729d38d2071124e937bfd75c66e71e, type: 3}
+    description: "\u30EB\u30D3\u30FC"
+    coolTime: 9
+    duration: 10
+    spawnCount: 4
+    resetChance: 0
+    spawnPosition: 0
+    forwardDistance: 2
+    randomRadius: 8
+    prefab: {fileID: 1228495754462396995, guid: ba6e77487edbea645a4b3b63c4133b3c, type: 3}
+    lifeTime: 10
+    castEffect: {fileID: 0}
+    castSE: {fileID: 0}
+    destroySE: {fileID: 0}
+  - enhancementType: 4
+    icon: {fileID: 21300000, guid: 86729d38d2071124e937bfd75c66e71e, type: 3}
+    description: "\u30AA\u30D1\u30FC\u30EB"
+    coolTime: 10
+    duration: 10
+    spawnCount: 10
+    resetChance: 0
+    spawnPosition: 0
+    forwardDistance: 2
+    randomRadius: 8
+    prefab: {fileID: 1228495754462396995, guid: ba6e77487edbea645a4b3b63c4133b3c, type: 3}
+    lifeTime: 10
     castEffect: {fileID: 0}
     castSE: {fileID: 0}
     destroySE: {fileID: 0}
