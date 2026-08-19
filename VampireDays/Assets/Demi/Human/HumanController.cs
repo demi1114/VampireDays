@@ -33,7 +33,10 @@ public class HumanController : MonoBehaviour
             humanData.isSpecialHuman &&
             humanData.specialEffect != null)
         {
-            Instantiate(humanData.specialEffect, transform);
+            Instantiate(
+                humanData.specialEffect,
+                transform
+            );
         }
 
         // HumanManagerへ登録
@@ -56,16 +59,20 @@ public class HumanController : MonoBehaviour
         Move();
     }
 
-    /// <summary>
-    /// ランダム移動
-    /// </summary>
+    //==================================================
+    // 移動
+    //==================================================
+
     private void Move()
     {
         // 吸血中は移動しない
         if (IsBeingDrained)
             return;
 
-        Vector3 dir = targetPosition - transform.position;
+        Vector3 dir =
+            targetPosition -
+            transform.position;
+
         dir.y = 0f;
 
         if (dir.magnitude < arriveDistance)
@@ -76,9 +83,15 @@ public class HumanController : MonoBehaviour
 
         dir.Normalize();
 
-        float speed = humanData != null ? humanData.moveSpeed : 2f;
+        float speed =
+            humanData != null
+                ? humanData.moveSpeed
+                : 2f;
 
-        transform.position += dir * speed * Time.deltaTime;
+        transform.position +=
+            dir *
+            speed *
+            Time.deltaTime;
 
         if (dir != Vector3.zero)
         {
@@ -86,59 +99,84 @@ public class HumanController : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 新しい目的地を決定
-    /// </summary>
     private void ChooseNewTarget()
     {
-        Vector2 random = Random.insideUnitCircle * moveRadius;
+        Vector2 random =
+            Random.insideUnitCircle *
+            moveRadius;
 
-        targetPosition = startPosition +
-                         new Vector3(random.x, 0f, random.y);
+        targetPosition =
+            startPosition +
+            new Vector3(
+                random.x,
+                0f,
+                random.y
+            );
     }
 
-    /// <summary>
-    /// 吸血開始
-    /// </summary>
+    //==================================================
+    // 吸血
+    //==================================================
+
     public void BeginDrain()
     {
         IsBeingDrained = true;
     }
 
     /// <summary>
-    /// 吸血終了（人間消滅）
+    /// 吸血終了
+    /// 血液を生成して人間を削除する
     /// </summary>
     public void FinishDrain()
     {
-        if (bloodPrefab != null)
-        {
-            int amount = humanData != null ? humanData.bloodAmount : 1;
-
-            for (int i = 0; i < amount; i++)
-            {
-                Vector3 offset = Random.insideUnitSphere * 0.3f;
-                offset.y = 0f;
-
-                Instantiate(
-                    bloodPrefab,
-                    transform.position + offset,
-                    Quaternion.identity);
-            }
-        }
+        SpawnBlood();
 
         Destroy(gameObject);
     }
 
     /// <summary>
-    /// バットを見る
+    /// 人間から血液を生成する
     /// </summary>
+    private void SpawnBlood()
+    {
+        if (bloodPrefab == null)
+            return;
+
+        int amount =
+            humanData != null
+                ? humanData.bloodAmount
+                : 1;
+
+        for (int i = 0; i < amount; i++)
+        {
+            Vector3 offset =
+                Random.insideUnitSphere * 0.3f;
+
+            offset.y = 0f;
+
+            Instantiate(
+                bloodPrefab,
+                transform.position + offset,
+                Quaternion.identity
+            );
+        }
+    }
+
+    //==================================================
+    // バット
+    //==================================================
+
     public void LookAtBat(Transform bat)
     {
         if (bat == null)
             return;
 
+        if (IsBeingDrained)
+            return;
+
         Vector3 direction =
-            bat.position - transform.position;
+            bat.position -
+            transform.position;
 
         direction.y = 0f;
 

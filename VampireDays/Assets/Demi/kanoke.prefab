@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6850471778541857944}
   - component: {fileID: 507697422511189757}
-  - component: {fileID: 3366753248059161711}
+  - component: {fileID: 5944119877134161710}
   m_Layer: 0
   m_Name: kanoke
   m_TagString: Untagged
@@ -91,7 +91,7 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &3366753248059161711
+--- !u!114 &5944119877134161710
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -100,10 +100,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 9160296282708227348}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 11f9ef92284fec2469cefeed2e2962c3, type: 3}
+  m_Script: {fileID: 11500000, guid: 3bf3f3acbde2a3742a1b4b50fca53209, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BatSkillObject
-  moveSpeed: 7
-  moveRange: 5
-  arrivalDistance: 0.2
-  attractionRange: 3
+  m_EditorClassIdentifier: Assembly-CSharp::CoffinSkillObject
+  moveSpeed: 10
+  moveRange: 10
+  arrivalDistance: 0
+  captureRadius: 0.8
+  collectRadius: 0.8
+  showDebugLog: 1

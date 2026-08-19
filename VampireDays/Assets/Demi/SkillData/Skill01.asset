@@ -24,10 +24,10 @@ MonoBehaviour:
     spawnCount: 2
     resetChance: 0
     spawnPosition: 0
-    forwardDistance: 2
-    randomRadius: 3
+    forwardDistance: 8
+    randomRadius: 8
     prefab: {fileID: 9160296282708227348, guid: 1dc5f120a89b5844fbea3dd2c1a77207, type: 3}
-    lifeTime: 0
+    lifeTime: 10
     castEffect: {fileID: 0}
     castSE: {fileID: 0}
     destroySE: {fileID: 0}
