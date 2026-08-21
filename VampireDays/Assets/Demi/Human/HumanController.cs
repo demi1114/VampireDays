@@ -22,6 +22,11 @@ public class HumanController : MonoBehaviour
     private Vector3 targetPosition;
     private Vector3 startPosition;
 
+
+    //==================================================
+    // Unity
+    //==================================================
+
     private void Start()
     {
         startPosition = transform.position;
@@ -46,6 +51,7 @@ public class HumanController : MonoBehaviour
         }
     }
 
+
     private void OnDestroy()
     {
         if (HumanManager.Instance != null)
@@ -54,10 +60,12 @@ public class HumanController : MonoBehaviour
         }
     }
 
+
     private void Update()
     {
         Move();
     }
+
 
     //==================================================
     // 移動
@@ -99,6 +107,7 @@ public class HumanController : MonoBehaviour
         }
     }
 
+
     private void ChooseNewTarget()
     {
         Vector2 random =
@@ -114,6 +123,7 @@ public class HumanController : MonoBehaviour
             );
     }
 
+
     //==================================================
     // 吸血
     //==================================================
@@ -122,6 +132,7 @@ public class HumanController : MonoBehaviour
     {
         IsBeingDrained = true;
     }
+
 
     /// <summary>
     /// 吸血終了
@@ -134,6 +145,7 @@ public class HumanController : MonoBehaviour
         Destroy(gameObject);
     }
 
+
     /// <summary>
     /// 人間から血液を生成する
     /// </summary>
@@ -142,17 +154,60 @@ public class HumanController : MonoBehaviour
         if (bloodPrefab == null)
             return;
 
-        int amount =
+
+        //==============================================
+        // 基本血液量
+        //==============================================
+
+        int baseAmount =
             humanData != null
                 ? humanData.bloodAmount
                 : 1;
 
-        for (int i = 0; i < amount; i++)
+
+        //==============================================
+        // Player取得
+        //==============================================
+
+        GameObject player =
+            GameObject.FindGameObjectWithTag("Player");
+
+
+        //==============================================
+        // 最終血液量
+        //==============================================
+
+        int finalAmount =
+            baseAmount;
+
+
+        if (player != null)
+        {
+            DropUpSkill dropUpSkill =
+                player.GetComponent<DropUpSkill>();
+
+            if (dropUpSkill != null)
+            {
+                finalAmount =
+                    dropUpSkill.CalculateDropAmount(
+                        baseAmount
+                    );
+            }
+        }
+
+
+        //==============================================
+        // 血液生成
+        //==============================================
+
+        for (int i = 0; i < finalAmount; i++)
         {
             Vector3 offset =
-                Random.insideUnitSphere * 0.3f;
+                Random.insideUnitSphere *
+                0.3f;
 
             offset.y = 0f;
+
 
             Instantiate(
                 bloodPrefab,
@@ -160,7 +215,44 @@ public class HumanController : MonoBehaviour
                 Quaternion.identity
             );
         }
+
+
+        Debug.Log(
+            $"血液ドロップ : " +
+            $"基本={baseAmount} → " +
+            $"最終={finalAmount}"
+        );
     }
+
+
+    //==================================================
+    // ドロップ量計算
+    //==================================================
+
+    /// <summary>
+    /// ドロップUPスキルを使用して
+    /// 最終的な血液量を計算する
+    /// </summary>
+    private int CalculateDropAmount(
+        int baseAmount)
+    {
+        GameObject player =
+            GameObject.FindGameObjectWithTag("Player");
+
+        if (player == null)
+            return baseAmount;
+
+        DropUpSkill dropUpSkill =
+            player.GetComponent<DropUpSkill>();
+
+        if (dropUpSkill == null)
+            return baseAmount;
+
+        return dropUpSkill.CalculateDropAmount(
+            baseAmount
+        );
+    }
+
 
     //==================================================
     // バット

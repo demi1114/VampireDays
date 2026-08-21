@@ -92,6 +92,10 @@ public class SkillVariantData
     [Tooltip("0以下で無制限")]
     public float lifeTime = 0f;
 
+    [Header("ドロップ効果")]
+    [Min(1f)]
+    public float dropMultiplier = 1f;
+
     [Header("演出")]
     public GameObject castEffect;
 

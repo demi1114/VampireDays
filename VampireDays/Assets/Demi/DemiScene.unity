@@ -1759,6 +1759,9 @@ GameObject:
   - component: {fileID: 434163818}
   - component: {fileID: 434163819}
   - component: {fileID: 434163820}
+  - component: {fileID: 434163822}
+  - component: {fileID: 434163821}
+  - component: {fileID: 434163823}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -1984,6 +1987,49 @@ MonoBehaviour:
   currentBlood: 0
   requiredBlood: 10
   requiredBloodIncrease: 3
+--- !u!114 &434163821
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 434163809}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68b467a0808e29f4badbe97e5afef2bf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DropUpSkill
+  skillData: {fileID: 11400000, guid: f99d623bcb1d2554f8481dc55a6408b9, type: 2}
+--- !u!114 &434163822
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 434163809}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c9b9857a3af1c704d8b7568180006ecd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SkillManager
+  skillDatabase: {fileID: 11400000, guid: 2bd286614a492f3438f5a28d52e45206, type: 2}
+  playerTransform: {fileID: 434163813}
+--- !u!114 &434163823
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 434163809}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1736635599abf744a7d3e2738249f94, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LevelUpManager
+  levelUpPanel: {fileID: 1401595821}
+  skillManager: {fileID: 434163822}
+  skillChoiceUI: {fileID: 487831775}
+  choiceCount: 3
 --- !u!1 &441735578
 GameObject:
   m_ObjectHideFlags: 0
@@ -4977,8 +5023,6 @@ GameObject:
   - component: {fileID: 1206338978}
   - component: {fileID: 1206338977}
   - component: {fileID: 1206338979}
-  - component: {fileID: 1206338981}
-  - component: {fileID: 1206338980}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -5027,36 +5071,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 45b47c35792cf894fa6733b31b69d14f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HumanManager
---- !u!114 &1206338980
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1206338976}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c9b9857a3af1c704d8b7568180006ecd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SkillManager
-  skillDatabase: {fileID: 11400000, guid: 2bd286614a492f3438f5a28d52e45206, type: 2}
-  playerTransform: {fileID: 434163813}
---- !u!114 &1206338981
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1206338976}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b1736635599abf744a7d3e2738249f94, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LevelUpManager
-  levelUpPanel: {fileID: 1401595821}
-  skillManager: {fileID: 1206338980}
-  skillChoiceUI: {fileID: 487831775}
-  choiceCount: 3
 --- !u!1 &1263288620
 GameObject:
   m_ObjectHideFlags: 0

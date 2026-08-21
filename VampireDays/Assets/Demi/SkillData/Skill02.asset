@@ -28,6 +28,7 @@ MonoBehaviour:
     randomRadius: 3
     prefab: {fileID: 0}
     lifeTime: 0
+    dropMultiplier: 1
     castEffect: {fileID: 0}
     castSE: {fileID: 0}
     destroySE: {fileID: 0}

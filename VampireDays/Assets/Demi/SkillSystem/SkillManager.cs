@@ -51,6 +51,9 @@ public class SkillManager : MonoBehaviour
 
         foreach (RuntimeSkill skill in currentSkills)
         {
+            if (skill == null)
+                continue;
+
             if (skill.skillData == skillData)
                 return true;
         }
@@ -62,13 +65,17 @@ public class SkillManager : MonoBehaviour
     /// <summary>
     /// RuntimeSkillを取得
     /// </summary>
-    public RuntimeSkill GetRuntimeSkill(SkillData skillData)
+    public RuntimeSkill GetRuntimeSkill(
+        SkillData skillData)
     {
         if (skillData == null)
             return null;
 
         foreach (RuntimeSkill skill in currentSkills)
         {
+            if (skill == null)
+                continue;
+
             if (skill.skillData == skillData)
                 return skill;
         }
@@ -84,7 +91,8 @@ public class SkillManager : MonoBehaviour
     /// <summary>
     /// 新しいスキルを取得
     /// </summary>
-    public bool AcquireSkill(SkillData skillData)
+    public bool AcquireSkill(
+        SkillData skillData)
     {
         if (skillData == null)
             return false;
@@ -144,6 +152,57 @@ public class SkillManager : MonoBehaviour
 
 
     //==================================================
+    // ドロップ倍率
+    //==================================================
+
+    /// <summary>
+    /// 現在のPassiveスキルによる
+    /// 血液ドロップ倍率を取得する。
+    ///
+    /// 何も所持していない場合は1倍。
+    /// 複数のドロップUP系Passiveを持っている場合は
+    /// それぞれの倍率を乗算する。
+    /// </summary>
+    public float GetDropMultiplier()
+    {
+        float multiplier = 1f;
+
+        foreach (RuntimeSkill skill in currentSkills)
+        {
+            if (skill == null)
+                continue;
+
+            if (skill.skillData == null)
+                continue;
+
+            // Passive以外は対象外
+            if (skill.skillData.skillType !=
+                SkillType.Passive)
+            {
+                continue;
+            }
+
+            SkillVariantData variant =
+                skill.Variant;
+
+            if (variant == null)
+                continue;
+
+            // 1未満にならないようにする
+            float value =
+                Mathf.Max(
+                    1f,
+                    variant.dropMultiplier
+                );
+
+            multiplier *= value;
+        }
+
+        return multiplier;
+    }
+
+
+    //==================================================
     // 抽選候補作成
     //==================================================
 
@@ -157,7 +216,8 @@ public class SkillManager : MonoBehaviour
         if (skillDatabase == null)
         {
             Debug.LogWarning(
-                "SkillManager : SkillDatabaseが設定されていません。"
+                "SkillManager : " +
+                "SkillDatabaseが設定されていません。"
             );
 
             return pool;
@@ -177,7 +237,6 @@ public class SkillManager : MonoBehaviour
 
             if (!HasSkill(skillData))
             {
-                // 未所持スキルはNormalのみ候補
                 if (skillData.HasVariant(
                     EnhancementType.Normal))
                 {
@@ -205,21 +264,20 @@ public class SkillManager : MonoBehaviour
             EnhancementType currentType =
                 runtimeSkill.enhancementType;
 
-            // 所持しているスキルの強化版を候補にする
             foreach (
                 EnhancementType type
                 in System.Enum.GetValues(
                     typeof(EnhancementType)))
             {
-                // Normalは新規取得用なので除外
+                // Normalは新規取得用
                 if (type == EnhancementType.Normal)
                     continue;
 
-                // 現在使用している強化版は除外
+                // 現在使用中の強化は除外
                 if (type == currentType)
                     continue;
 
-                // 実際に存在する強化版だけ候補にする
+                // 存在する強化だけ候補
                 if (skillData.HasVariant(type))
                 {
                     pool.Add(
@@ -254,19 +312,20 @@ public class SkillManager : MonoBehaviour
         if (pool.Count == 0)
         {
             Debug.LogWarning(
-                "SkillManager : 抽選可能なスキルがありません。"
+                "SkillManager : " +
+                "抽選可能なスキルがありません。"
             );
 
             return result;
         }
 
-        // 候補数より多く要求しない
-        count = Mathf.Min(
-            count,
-            pool.Count
-        );
+        count =
+            Mathf.Min(
+                count,
+                pool.Count
+            );
 
-        // Fisher-Yatesシャッフル
+        // Fisher-Yates
         for (int i = pool.Count - 1; i > 0; i--)
         {
             int randomIndex =
@@ -282,7 +341,6 @@ public class SkillManager : MonoBehaviour
                 temp;
         }
 
-        // 必要数だけ取得
         for (int i = 0; i < count; i++)
         {
             result.Add(pool[i]);
@@ -308,10 +366,7 @@ public class SkillManager : MonoBehaviour
             return false;
         }
 
-        //==========================================
         // 新規取得
-        //==========================================
-
         if (choice.enhancementType ==
             EnhancementType.Normal)
         {
@@ -320,10 +375,7 @@ public class SkillManager : MonoBehaviour
             );
         }
 
-        //==========================================
         // 強化
-        //==========================================
-
         return ChangeEnhancement(
             choice.skillData,
             choice.enhancementType
@@ -361,17 +413,16 @@ public class SkillManager : MonoBehaviour
                 continue;
             }
 
-            // CTを減少
             skill.currentCoolTime -=
                 Time.deltaTime;
 
-            // CT終了
             if (skill.currentCoolTime <= 0f)
             {
                 skill.currentCoolTime = 0f;
 
                 Debug.Log(
-                    $"CT終了 : {skill.skillData.skillName}"
+                    $"CT終了 : " +
+                    $"{skill.skillData.skillName}"
                 );
 
                 ActivateSkill(skill);
@@ -384,10 +435,8 @@ public class SkillManager : MonoBehaviour
     // スキル発動
     //==================================================
 
-    /// <summary>
-    /// スキルを発動する
-    /// </summary>
-    private void ActivateSkill(RuntimeSkill skill)
+    private void ActivateSkill(
+        RuntimeSkill skill)
     {
         if (skill == null)
             return;
@@ -413,24 +462,13 @@ public class SkillManager : MonoBehaviour
             $"{skill.skillData.skillName}"
         );
 
-        Debug.Log(
-            $"Prefab : {variant.prefab}"
-        );
-
-        // Prefab生成
         SpawnSkillObject(
             skill,
             variant
         );
 
-        // 発動後にCTをリセット
         skill.currentCoolTime =
             variant.coolTime;
-
-        Debug.Log(
-            $"CTリセット : " +
-            $"{skill.currentCoolTime}"
-        );
     }
 
 
@@ -438,21 +476,12 @@ public class SkillManager : MonoBehaviour
     // スキルオブジェクト生成
     //==================================================
 
-    /// <summary>
-    /// スキルPrefabを生成する
-    /// </summary>
     private void SpawnSkillObject(
         RuntimeSkill skill,
         SkillVariantData variant)
     {
         if (variant == null)
-        {
-            Debug.LogError(
-                "SpawnSkillObject : Variantがnullです。"
-            );
-
             return;
-        }
 
         if (variant.prefab == null)
         {
@@ -464,9 +493,11 @@ public class SkillManager : MonoBehaviour
             return;
         }
 
-        // SpawnCountが0以下なら1回生成
         int spawnCount =
-            Mathf.Max(1, variant.spawnCount);
+            Mathf.Max(
+                1,
+                variant.spawnCount
+            );
 
         for (int i = 0; i < spawnCount; i++)
         {
@@ -480,24 +511,12 @@ public class SkillManager : MonoBehaviour
                     Quaternion.identity
                 );
 
-            Debug.Log(
-                $"Prefab生成 : " +
-                $"{obj.name} / " +
-                $"位置 : {spawnPosition}"
-            );
-
-            // ISkillObjectを取得
             ISkillObject skillObject =
                 obj.GetComponent<ISkillObject>();
 
             if (skillObject != null)
             {
                 skillObject.Initialize(skill);
-
-                Debug.Log(
-                    $"ISkillObject初期化 : " +
-                    $"{obj.name}"
-                );
             }
             else
             {
@@ -507,7 +526,6 @@ public class SkillManager : MonoBehaviour
                 );
             }
 
-            // LifeTimeが設定されている場合
             if (variant.lifeTime > 0f)
             {
                 Destroy(
@@ -523,14 +541,9 @@ public class SkillManager : MonoBehaviour
     // スポーン位置
     //==================================================
 
-    /// <summary>
-    /// スキルの生成位置を取得する
-    /// </summary>
     private Vector3 GetSpawnPosition(
         SkillVariantData variant)
     {
-        // Playerが設定されていればPlayerを使用
-        // 未設定の場合はSkillManager自身を使用
         Vector3 playerPosition =
             playerTransform != null
                 ? playerTransform.position
@@ -538,18 +551,10 @@ public class SkillManager : MonoBehaviour
 
         switch (variant.spawnPosition)
         {
-            //==========================================
-            // Player
-            //==========================================
-
             case SpawnPositionType.Player:
 
                 return playerPosition;
 
-
-            //==========================================
-            // Forward
-            //==========================================
 
             case SpawnPositionType.Forward:
 
@@ -560,10 +565,6 @@ public class SkillManager : MonoBehaviour
                        playerTransform.forward *
                        variant.forwardDistance;
 
-
-            //==========================================
-            // RandomAround
-            //==========================================
 
             case SpawnPositionType.RandomAround:
 
@@ -579,18 +580,10 @@ public class SkillManager : MonoBehaviour
                        );
 
 
-            //==========================================
-            // Cursor
-            //==========================================
-
             case SpawnPositionType.Cursor:
 
                 return GetCursorWorldPosition();
 
-
-            //==========================================
-            // TargetEnemy
-            //==========================================
 
             case SpawnPositionType.TargetEnemy:
 
@@ -608,25 +601,23 @@ public class SkillManager : MonoBehaviour
     // カーソル位置
     //==================================================
 
-    /// <summary>
-    /// マウスカーソルのワールド座標を取得
-    /// </summary>
     private Vector3 GetCursorWorldPosition()
     {
         Camera cam =
             Camera.main;
 
         if (cam == null)
+        {
             return playerTransform != null
                 ? playerTransform.position
                 : transform.position;
+        }
 
         Ray ray =
             cam.ScreenPointToRay(
                 Input.mousePosition
             );
 
-        // 地面の高さをPlayerのY座標に合わせる
         float groundY =
             playerTransform != null
                 ? playerTransform.position.y
@@ -649,7 +640,6 @@ public class SkillManager : MonoBehaviour
             return ray.GetPoint(distance);
         }
 
-        // Raycastできなかった場合
         return playerTransform != null
             ? playerTransform.position
             : transform.position;
@@ -660,15 +650,8 @@ public class SkillManager : MonoBehaviour
     // 対象敵位置
     //==================================================
 
-    /// <summary>
-    /// 対象となる敵の位置を取得
-    /// 現在は仮実装
-    /// </summary>
     private Vector3 GetTargetEnemyPosition()
     {
-        // TODO:
-        // 今後、最も近い人間などを取得する処理を実装する
-
         return playerTransform != null
             ? playerTransform.position
             : transform.position;

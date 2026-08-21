@@ -287,6 +287,10 @@ public class CoffinSkillObject : MonoBehaviour, ISkillObject
         if (!hasCaptured)
             return;
 
+        if (player == null)
+            return;
+
+
         PlayerLevel playerLevel =
             player.GetComponent<PlayerLevel>();
 
@@ -300,20 +304,51 @@ public class CoffinSkillObject : MonoBehaviour, ISkillObject
             return;
         }
 
-        // 血液を直接プレイヤーへ加算
+
+        //==============================================
+        // ドロップUP適用
+        //==============================================
+
+        int finalAmount =
+            bloodAmount;
+
+
+        DropUpSkill dropUpSkill =
+            player.GetComponent<DropUpSkill>();
+
+
+        if (dropUpSkill != null)
+        {
+            finalAmount =
+                dropUpSkill.CalculateDropAmount(
+                    bloodAmount
+                );
+        }
+
+
+        //==============================================
+        // 血液追加
+        //==============================================
+
         playerLevel.AddBlood(
-            bloodAmount
+            finalAmount
         );
+
 
         if (showDebugLog)
         {
             Debug.Log(
                 $"棺桶から血液取得 : " +
-                $"{bloodAmount}"
+                $"基本量={bloodAmount} / " +
+                $"最終量={finalAmount}"
             );
         }
 
-        // 棺桶消滅
+
+        //==============================================
+        // 棺桶削除
+        //==============================================
+
         Destroy(gameObject);
     }
 
