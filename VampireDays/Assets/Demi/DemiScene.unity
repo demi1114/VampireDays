@@ -1763,6 +1763,7 @@ GameObject:
   - component: {fileID: 434163821}
   - component: {fileID: 434163823}
   - component: {fileID: 434163824}
+  - component: {fileID: 434163825}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -2044,6 +2045,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DrainSpeedUpSkill
   skillData: {fileID: 11400000, guid: 8b7897f2008590c4aa9b2a38bf35b70e, type: 2}
+--- !u!114 &434163825
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 434163809}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6cc3836d51cc9214a891cdb096bf81cd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MoveSpeedUpSkill
+  skillData: {fileID: 11400000, guid: 5a16c0a4a9369d041a16f4073317566b, type: 2}
 --- !u!1 &441735578
 GameObject:
   m_ObjectHideFlags: 0

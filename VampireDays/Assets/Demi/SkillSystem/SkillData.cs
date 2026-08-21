@@ -101,6 +101,10 @@ public class SkillVariantData
     [Range(0.1f, 1f)]
     public float drainTimeMultiplier = 1f;
 
+    [Header("パッシブ効果")]
+    [Min(1f)]
+    public float moveSpeedMultiplier = 1f;
+
     [Header("演出")]
     public GameObject castEffect;
 

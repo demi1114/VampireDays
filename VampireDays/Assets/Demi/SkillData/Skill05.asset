@@ -12,13 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b9a3409d6c975784ca62fa24fa421649, type: 3}
   m_Name: Skill05
   m_EditorClassIdentifier: Assembly-CSharp::SkillData
-  id: 5
-  skillName: "\u95C7\u306E\u8863"
-  skillType: 1
+  id: 2
+  skillName: "\u30B9\u30D4\u30FC\u30C9UP"
+  skillType: 2
   normalData:
     enhancementType: 0
     icon: {fileID: 21300000, guid: 86729d38d2071124e937bfd75c66e71e, type: 3}
-    description: "\u95C7\u306E\u8863"
+    description: "\u30B9\u30D4\u30FC\u30C9UP"
     coolTime: 1
     duration: 0
     spawnCount: 1
@@ -28,6 +28,9 @@ MonoBehaviour:
     randomRadius: 3
     prefab: {fileID: 0}
     lifeTime: 0
+    dropMultiplier: 1
+    drainTimeMultiplier: 1
+    moveSpeedMultiplier: 2
     castEffect: {fileID: 0}
     castSE: {fileID: 0}
     destroySE: {fileID: 0}
