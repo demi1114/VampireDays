@@ -92,15 +92,15 @@ public class SkillManager : MonoBehaviour
     /// 新しいスキルを取得
     /// </summary>
     public bool AcquireSkill(
-        SkillData skillData)
+    SkillData skillData)
     {
         if (skillData == null)
             return false;
 
-        // すでに所持している場合は取得できない
         if (HasSkill(skillData))
             return false;
 
+        // RuntimeSkill生成
         RuntimeSkill runtimeSkill =
             new RuntimeSkill(skillData);
 
@@ -109,6 +109,36 @@ public class SkillManager : MonoBehaviour
         Debug.Log(
             $"スキル取得 : {skillData.skillName}"
         );
+
+
+        //==================================================
+        // 召喚スキル取得時
+        //==================================================
+
+        if (skillData.skillType == SkillType.Summon)
+        {
+            // 取得した瞬間から
+            // 召喚マスターの効果を適用
+            runtimeSkill.currentCoolTime =
+                GetActualCoolTime(runtimeSkill);
+
+            Debug.Log(
+                $"召喚スキル初期CT : " +
+                $"{runtimeSkill.currentCoolTime:F2}秒"
+            );
+        }
+
+
+        //==================================================
+        // Passive取得時
+        //==================================================
+
+        if (skillData.skillType == SkillType.Passive)
+        {
+            // すでに存在する召喚スキルへ
+            // 召喚マスターの効果を即時反映
+            ApplySummonCoolTimeReduction();
+        }
 
         return true;
     }
@@ -138,14 +168,21 @@ public class SkillManager : MonoBehaviour
             return false;
 
         runtimeSkill.ChangeEnhancement(
-            enhancementType
-        );
+    enhancementType
+);
 
         Debug.Log(
             $"スキル変更 : " +
             $"{skillData.skillName} → " +
             $"{enhancementType}"
         );
+
+        // Passiveの強化によって
+        // 召喚CT短縮率が変化する可能性があるため即時反映
+        if (skillData.skillType == SkillType.Passive)
+        {
+            RefreshSummonCoolTimes();
+        }
 
         return true;
     }
@@ -231,12 +268,22 @@ public class SkillManager : MonoBehaviour
             if (skillData == null)
                 continue;
 
-            //==========================================
-            // 未所持スキル
-            //==========================================
 
-            if (!HasSkill(skillData))
+            //==================================================
+            // 所持済みか確認
+            //==================================================
+
+            RuntimeSkill runtimeSkill =
+                GetRuntimeSkill(skillData);
+
+
+            //==================================================
+            // 未所持
+            //==================================================
+
+            if (runtimeSkill == null)
             {
+                // Normalのみ新規取得候補にする
                 if (skillData.HasVariant(
                     EnhancementType.Normal))
                 {
@@ -251,42 +298,54 @@ public class SkillManager : MonoBehaviour
                 continue;
             }
 
-            //==========================================
-            // 所持スキル
-            //==========================================
 
-            RuntimeSkill runtimeSkill =
-                GetRuntimeSkill(skillData);
-
-            if (runtimeSkill == null)
-                continue;
+            //==================================================
+            // ここから所持済み
+            //==================================================
 
             EnhancementType currentType =
                 runtimeSkill.enhancementType;
+
+
+            //==================================================
+            // 強化候補
+            //==================================================
 
             foreach (
                 EnhancementType type
                 in System.Enum.GetValues(
                     typeof(EnhancementType)))
             {
-                // Normalは新規取得用
+                //==============================================
+                // Normalは絶対に候補にしない
+                //==============================================
+
                 if (type == EnhancementType.Normal)
                     continue;
 
-                // 現在使用中の強化は除外
+
+                //==============================================
+                // 現在使用中の強化は候補にしない
+                //==============================================
+
                 if (type == currentType)
                     continue;
 
+
+                //==============================================
                 // 存在する強化だけ候補
-                if (skillData.HasVariant(type))
-                {
-                    pool.Add(
-                        new SkillChoiceData(
-                            skillData,
-                            type
-                        )
-                    );
-                }
+                //==============================================
+
+                if (!skillData.HasVariant(type))
+                    continue;
+
+
+                pool.Add(
+                    new SkillChoiceData(
+                        skillData,
+                        type
+                    )
+                );
             }
         }
 
@@ -436,7 +495,7 @@ public class SkillManager : MonoBehaviour
     //==================================================
 
     private void ActivateSkill(
-        RuntimeSkill skill)
+      RuntimeSkill skill)
     {
         if (skill == null)
             return;
@@ -467,8 +526,14 @@ public class SkillManager : MonoBehaviour
             variant
         );
 
+        // 召喚マスターを考慮したCT
         skill.currentCoolTime =
-            variant.coolTime;
+            GetActualCoolTime(skill);
+
+        Debug.Log(
+            $"次回CT : " +
+            $"{skill.currentCoolTime:F2}秒"
+        );
     }
 
 
@@ -645,6 +710,169 @@ public class SkillManager : MonoBehaviour
             : transform.position;
     }
 
+    //==================================================
+    // 召喚CT
+    //==================================================
+
+    /// <summary>
+    /// 現在の召喚マスター効果を取得する
+    ///
+    /// 複数の召喚マスターが存在する場合は
+    /// 短縮率を加算する。
+    /// </summary>
+    private float GetSummonCoolTimeReduction()
+    {
+        float reduction = 0f;
+
+        foreach (RuntimeSkill skill in currentSkills)
+        {
+            if (skill == null)
+                continue;
+
+            if (skill.skillData == null)
+                continue;
+
+            // Passive以外は対象外
+            if (skill.skillData.skillType !=
+                SkillType.Passive)
+            {
+                continue;
+            }
+
+            SkillVariantData variant =
+                skill.Variant;
+
+            if (variant == null)
+                continue;
+
+            reduction +=
+                variant.summonCoolTimeReduction;
+        }
+
+        // 100%以上短縮されないようにする
+        return Mathf.Clamp01(reduction);
+    }
+
+    //==================================================
+    // 召喚CT短縮の即時反映
+    //==================================================
+
+    /// <summary>
+    /// 現在進行中の召喚スキルCTに
+    /// 召喚マスターの効果を即座に反映する。
+    /// </summary>
+    private void ApplySummonCoolTimeReduction()
+    {
+        float reduction =
+            GetSummonCoolTimeReduction();
+
+        foreach (RuntimeSkill skill in currentSkills)
+        {
+            if (skill == null)
+                continue;
+
+            if (skill.skillData == null)
+                continue;
+
+            // 召喚系のみ
+            if (skill.skillData.skillType !=
+                SkillType.Summon)
+            {
+                continue;
+            }
+
+            // すでにCTが終了している場合は何もしない
+            if (skill.currentCoolTime <= 0f)
+                continue;
+
+            skill.currentCoolTime *=
+                (1f - reduction);
+        }
+    }
+
+    /// <summary>
+    /// スキルの実際のCTを計算する
+    /// </summary>
+    private float GetActualCoolTime(
+        RuntimeSkill skill)
+    {
+        if (skill == null)
+            return 0f;
+
+        if (skill.skillData == null)
+            return 0f;
+
+        SkillVariantData variant =
+            skill.Variant;
+
+        if (variant == null)
+            return 0f;
+
+        float baseCoolTime =
+            Mathf.Max(
+                0f,
+                variant.coolTime
+            );
+
+        // 召喚系のみ短縮
+        if (skill.skillData.skillType !=
+            SkillType.Summon)
+        {
+            return baseCoolTime;
+        }
+
+        float reduction =
+            GetSummonCoolTimeReduction();
+
+        return baseCoolTime *
+               (1f - reduction);
+    }
+
+    private void RefreshSummonCoolTimes()
+    {
+        float reduction =
+            GetSummonCoolTimeReduction();
+
+        foreach (RuntimeSkill skill in currentSkills)
+        {
+            if (skill == null)
+                continue;
+
+            if (skill.skillData == null)
+                continue;
+
+            if (skill.skillData.skillType !=
+                SkillType.Summon)
+            {
+                continue;
+            }
+
+            if (skill.currentCoolTime <= 0f)
+                continue;
+
+            // 現在の残りCTを、
+            // 現在の短縮率に合わせて再計算
+            float baseCoolTime =
+                skill.Variant != null
+                    ? skill.Variant.coolTime
+                    : 0f;
+
+            if (baseCoolTime <= 0f)
+                continue;
+
+            float newCoolTime =
+                baseCoolTime *
+                (1f - reduction);
+
+            // 現在の残り時間が
+            // 新しい最大CTを超えないようにする
+            skill.currentCoolTime =
+                Mathf.Min(
+                    skill.currentCoolTime,
+                    newCoolTime
+                );
+        }
+    }
 
     //==================================================
     // 対象敵位置

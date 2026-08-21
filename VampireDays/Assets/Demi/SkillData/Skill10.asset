@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Skill10
   m_EditorClassIdentifier: Assembly-CSharp::SkillData
   id: 10
-  skillName: "\u7737\u5C5E\u30DE\u30B9\u30BF\u30FC"
+  skillName: aaaa
   skillType: 2
   normalData:
     enhancementType: 0
@@ -28,6 +28,11 @@ MonoBehaviour:
     randomRadius: 3
     prefab: {fileID: 0}
     lifeTime: 0
+    dropMultiplier: 1
+    recoveryMultiplier: 1
+    drainTimeMultiplier: 1
+    moveSpeedMultiplier: 1
+    summonCoolTimeReduction: 0
     castEffect: {fileID: 0}
     castSE: {fileID: 0}
     destroySE: {fileID: 0}
