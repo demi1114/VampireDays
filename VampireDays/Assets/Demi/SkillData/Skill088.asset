@@ -10,25 +10,26 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b9a3409d6c975784ca62fa24fa421649, type: 3}
-  m_Name: Skill03
+  m_Name: Skill088
   m_EditorClassIdentifier: Assembly-CSharp::SkillData
-  id: 3
-  skillName: "\u30C9\u30ED\u30C3\u30D7UP"
+  id: 88
+  skillName: "\u59CB\u7956\u306E\u9BAE\u8840"
   skillType: 2
   normalData:
     enhancementType: 0
     icon: {fileID: 21300000, guid: 86729d38d2071124e937bfd75c66e71e, type: 3}
-    description: "\u30C9\u30ED\u30C3\u30D7UP"
-    coolTime: 0
+    description: "\u59CB\u7956\u306E\u9BAE\u8840"
+    coolTime: 1
     duration: 0
-    spawnCount: 0
+    spawnCount: 1
     resetChance: 0
     spawnPosition: 0
-    forwardDistance: 0
-    randomRadius: 0
+    forwardDistance: 2
+    randomRadius: 3
     prefab: {fileID: 0}
     lifeTime: 0
-    dropMultiplier: 1.2
+    dropMultiplier: 1
+    drainTimeMultiplier: 1
     castEffect: {fileID: 0}
     castSE: {fileID: 0}
     destroySE: {fileID: 0}

@@ -13,21 +13,23 @@ MonoBehaviour:
   m_Name: Skill08
   m_EditorClassIdentifier: Assembly-CSharp::SkillData
   id: 8
-  skillName: "\u59CB\u7956\u306E\u9BAE\u8840"
+  skillName: "\u5438\u8840\u901F\u5EA6UP"
   skillType: 2
   normalData:
     enhancementType: 0
     icon: {fileID: 21300000, guid: 86729d38d2071124e937bfd75c66e71e, type: 3}
-    description: "\u59CB\u7956\u306E\u9BAE\u8840"
-    coolTime: 1
+    description: "\u30C9\u30ED\u30C3\u30D7UP"
+    coolTime: 0
     duration: 0
-    spawnCount: 1
+    spawnCount: 0
     resetChance: 0
     spawnPosition: 0
-    forwardDistance: 2
-    randomRadius: 3
+    forwardDistance: 0
+    randomRadius: 0
     prefab: {fileID: 0}
     lifeTime: 0
+    dropMultiplier: 1.2
+    drainTimeMultiplier: 0.2
     castEffect: {fileID: 0}
     castSE: {fileID: 0}
     destroySE: {fileID: 0}

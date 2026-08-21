@@ -96,6 +96,11 @@ public class SkillVariantData
     [Min(1f)]
     public float dropMultiplier = 1f;
 
+    [Header("‹zŒŒ‘¬“xŒø‰Ê")]
+    [Tooltip("‹zŒŒŠÔ‚ÉŠ|‚¯‚é”{—¦B¬‚³‚¢‚Ù‚Ç‹zŒŒ‚ª‘¬‚¢")]
+    [Range(0.1f, 1f)]
+    public float drainTimeMultiplier = 1f;
+
     [Header("‰‰o")]
     public GameObject castEffect;
 
