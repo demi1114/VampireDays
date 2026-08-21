@@ -177,31 +177,46 @@ public class PlayerVampire : MonoBehaviour
         if (currentHuman == null)
             return;
 
+        //==============================================
+        // 基本回復量
+        //==============================================
 
-        // 回復
-        if (status != null)
+        float finalHealAmount =
+            healAmount;
+
+
+        //==============================================
+        // 回復量UP適用
+        //==============================================
+
+        RecoveryUpSkill recoveryUpSkill =
+            GetComponent<RecoveryUpSkill>();
+
+        if (recoveryUpSkill != null)
         {
-            status.Heal(
-                healAmount
-            );
+            finalHealAmount =
+                recoveryUpSkill.CalculateRecoveryAmount(
+                    healAmount
+                );
         }
 
 
-        // 人間から血液生成
-        currentHuman.FinishDrain();
+        //==============================================
+        // 回復
+        //==============================================
 
-
-        Debug.Log(
-            $"吸血完了 : " +
-            $"吸血時間={currentRequiredDrainTime:F2}秒"
+        status.Heal(
+            finalHealAmount
         );
 
 
-        // リセット
+        //==============================================
+        // 吸血終了
+        //==============================================
+
+        currentHuman.FinishDrain();
+
         currentHuman = null;
-
         currentDrainTime = 0f;
-
-        currentRequiredDrainTime = 0f;
     }
 }

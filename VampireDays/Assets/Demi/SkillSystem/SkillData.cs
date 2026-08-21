@@ -96,6 +96,10 @@ public class SkillVariantData
     [Min(1f)]
     public float dropMultiplier = 1f;
 
+    [Header("‰ñ•œŒø‰Ê")]
+    [Min(1f)]
+    public float recoveryMultiplier = 1f;
+
     [Header("‹zŒŒ‘¬“xŒø‰Ê")]
     [Tooltip("‹zŒŒŠÔ‚ÉŠ|‚¯‚é”{—¦B¬‚³‚¢‚Ù‚Ç‹zŒŒ‚ª‘¬‚¢")]
     [Range(0.1f, 1f)]

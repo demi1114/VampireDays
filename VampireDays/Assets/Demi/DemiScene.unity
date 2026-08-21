@@ -1764,6 +1764,7 @@ GameObject:
   - component: {fileID: 434163823}
   - component: {fileID: 434163824}
   - component: {fileID: 434163825}
+  - component: {fileID: 434163826}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -2058,6 +2059,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MoveSpeedUpSkill
   skillData: {fileID: 11400000, guid: 5a16c0a4a9369d041a16f4073317566b, type: 2}
+--- !u!114 &434163826
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 434163809}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f8cf1b6a0f3cb04090fcee287bc94a4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RecoveryUpSkill
+  skillData: {fileID: 11400000, guid: f93a2ed47f2b4f542b08b9aa150408c0, type: 2}
 --- !u!1 &441735578
 GameObject:
   m_ObjectHideFlags: 0
@@ -5071,7 +5085,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
   gameTime: 300
-  damagePerSecond: 0
+  damagePerSecond: 4
 --- !u!4 &1206338978
 Transform:
   m_ObjectHideFlags: 0
