@@ -27,3 +27,11 @@ public enum SpawnPositionType
     TargetEnemy,   // 対象の敵
     Forward        // プレイヤー前方
 }
+
+/// レアリティ
+public enum SkillRarity
+{
+    Common, // コモン
+    Rare,   // レア
+    Epic    // エピック
+}

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System.Linq;
 
 /// <summary>
 /// プレイヤーのスキルを管理する
@@ -11,10 +12,25 @@ public class SkillManager : MonoBehaviour
     [SerializeField]
     private SkillDatabase skillDatabase;
 
+    [Header("レア度別抽選ウェイト")]
+    [Min(0f)]
+    [SerializeField] private float commonWeight = 55f;
+
+    [Min(0f)]
+    [SerializeField] private float rareWeight = 30f;
+
+    [Min(0f)]
+    [SerializeField] private float epicWeight = 15f;
+
     [Header("プレイヤー")]
     [Tooltip("スキルの生成位置・向きの基準となるPlayer")]
     [SerializeField]
     private Transform playerTransform;
+
+    [Header("特殊パッシブスキル")]
+    [Tooltip("取得時に所持スキルを一斉発動するスキル")]
+    [SerializeField]
+    private SkillData ancestralBloodSkillData;
 
     /// <summary>
     /// 現在所持しているスキル
@@ -92,8 +108,11 @@ public class SkillManager : MonoBehaviour
     /// <summary>
     /// 新しいスキルを取得
     /// </summary>
-    public bool AcquireSkill(
-    SkillData skillData)
+
+    /// <summary>
+    /// 新しいスキルを取得
+    /// </summary>
+    public bool AcquireSkill(SkillData skillData)
     {
         if (skillData == null)
             return false;
@@ -111,16 +130,147 @@ public class SkillManager : MonoBehaviour
             $"スキル取得 : {skillData.skillName}"
         );
 
-        // パッシブ取得時は、既存の魔法・召喚スキルを再計算
+        // パッシブ取得時は、既存の魔法・召喚スキルのCTを再計算
         if (skillData.skillType == SkillType.Passive)
         {
             RefreshSkillCoolTimes();
         }
 
-        return true;
+        // 始祖の鮮血なら取得時に即時発動
+        if (skillData == ancestralBloodSkillData)
+        {
+            AncestralBloodSkill ancestralBlood =
+                GetComponent<AncestralBloodSkill>();
 
+            if (ancestralBlood != null)
+            {
+                ancestralBlood.Activate();
+            }
+            else
+            {
+                Debug.LogError(
+                    "AncestralBloodSkillが見つかりません。"
+                );
+            }
+        }
+
+        return true;
     }
 
+
+    /// <summary>
+    /// 始祖の鮮血の効果。
+    /// 所持中の召喚・魔法スキルを即時発動し、
+    /// CTをリセットした後、自身を所持リストから削除する。
+    /// </summary>
+    /// <summary>
+    /// 始祖の鮮血の効果。
+    /// 所持中の召喚・魔法スキルを即時発動し、
+    /// CTをリセットした後、自身を所持リストから削除する。
+    /// </summary>
+    public void ActivateAncestralBloodEffect()
+    {
+        Debug.Log("【始祖の鮮血】効果開始");
+
+        RuntimeSkill[] skills = currentSkills.ToArray();
+
+        int targetCount = 0;
+
+        foreach (RuntimeSkill skill in skills)
+        {
+            if (skill == null || skill.skillData == null)
+                continue;
+
+            // 始祖の鮮血自身は対象外
+            if (skill.skillData == ancestralBloodSkillData)
+                continue;
+
+            SkillType type = skill.skillData.skillType;
+
+            // 召喚・魔法以外は対象外
+            if (type != SkillType.Summon &&
+                type != SkillType.Magic)
+            {
+                Debug.Log(
+                    $"【始祖の鮮血】対象外: " +
+                    $"{skill.skillData.skillName} / {type}"
+                );
+
+                continue;
+            }
+
+            targetCount++;
+
+            SkillVariantData variant = skill.Variant;
+
+            if (variant == null)
+            {
+                Debug.LogError(
+                    $"【始祖の鮮血】Variantがありません: " +
+                    $"{skill.skillData.skillName}"
+                );
+
+                continue;
+            }
+
+            if (variant.prefab == null)
+            {
+                Debug.LogError(
+                    $"【始祖の鮮血】Prefab未設定: " +
+                    $"{skill.skillData.skillName}"
+                );
+
+                continue;
+            }
+
+            Debug.Log(
+                $"【始祖の鮮血】強制発動: " +
+                $"{skill.skillData.skillName} / " +
+                $"種類={type} / " +
+                $"Prefab={variant.prefab.name}"
+            );
+
+            // 通常の発動処理を利用
+            ActivateSkill(skill);
+
+            // 発動後にCTをリセット
+            float coolTime = GetActualCoolTime(skill);
+
+            skill.currentCoolTimeDuration = coolTime;
+            skill.currentCoolTime = coolTime;
+
+            Debug.Log(
+                $"【始祖の鮮血】発動処理終了: " +
+                $"{skill.skillData.skillName} / " +
+                $"次回CT={coolTime:F2}秒"
+            );
+        }
+
+        Debug.Log(
+            $"【始祖の鮮血】発動対象数: {targetCount}"
+        );
+
+        // 始祖の鮮血自身を削除
+        RuntimeSkill ancestralBlood =
+            GetRuntimeSkill(ancestralBloodSkillData);
+
+        if (ancestralBlood != null)
+        {
+            currentSkills.Remove(ancestralBlood);
+
+            Debug.Log(
+                "【始祖の鮮血】所持リストから削除しました"
+            );
+        }
+        else
+        {
+            Debug.LogWarning(
+                "【始祖の鮮血】削除対象が見つかりません"
+            );
+        }
+
+        Debug.Log("【始祖の鮮血】効果終了");
+    }
 
     //==================================================
     // 強化
@@ -338,52 +488,91 @@ public class SkillManager : MonoBehaviour
     /// <summary>
     /// 抽選可能候補からランダムに指定数取得
     /// </summary>
-    public List<SkillChoiceData> DrawSkillChoices(
-        int count = 3)
+    /// <summary>
+    /// レア度に応じた重み付き抽選でスキル候補を取得する
+    /// </summary>
+    public List<SkillChoiceData> DrawSkillChoices(int count = 3)
     {
-        List<SkillChoiceData> pool =
-            CreateChoicePool();
-
-        List<SkillChoiceData> result = new();
+        List<SkillChoiceData> pool = CreateChoicePool();
+        List<SkillChoiceData> result = new List<SkillChoiceData>();
 
         if (pool.Count == 0)
         {
-            Debug.LogWarning(
-                "SkillManager : " +
-                "抽選可能なスキルがありません。"
-            );
-
+            Debug.LogWarning("抽選可能なスキルがありません。");
             return result;
         }
 
-        count =
-            Mathf.Min(
-                count,
-                pool.Count
-            );
+        count = Mathf.Min(count, pool.Count);
 
-        // Fisher-Yates
-        for (int i = pool.Count - 1; i > 0; i--)
+        while (result.Count < count && pool.Count > 0)
         {
-            int randomIndex =
-                Random.Range(0, i + 1);
+            float totalWeight = 0f;
 
-            SkillChoiceData temp =
-                pool[i];
+            // 候補全体のウェイトを合計する
+            foreach (SkillChoiceData choice in pool)
+            {
+                totalWeight += GetRarityWeight(choice);
+            }
 
-            pool[i] =
-                pool[randomIndex];
+            // すべてのウェイトが0なら、残り候補から均等に選ぶ
+            if (totalWeight <= 0f)
+            {
+                int randomIndex = Random.Range(0, pool.Count);
+                result.Add(pool[randomIndex]);
+                pool.RemoveAt(randomIndex);
+                continue;
+            }
 
-            pool[randomIndex] =
-                temp;
-        }
+            float randomValue = Random.Range(0f, totalWeight);
+            float currentWeight = 0f;
 
-        for (int i = 0; i < count; i++)
-        {
-            result.Add(pool[i]);
+            for (int i = 0; i < pool.Count; i++)
+            {
+                currentWeight += GetRarityWeight(pool[i]);
+
+                if (randomValue < currentWeight)
+                {
+                    result.Add(pool[i]);
+                    pool.RemoveAt(i);
+                    break;
+                }
+            }
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// スキルのレア度に対応した抽選ウェイトを返す
+    /// 強化形態ではなくSkillData本体のレア度を参照する
+    /// </summary>
+    private float GetRarityWeight(SkillChoiceData choice)
+    {
+        if (choice == null || choice.skillData == null)
+            return 0f;
+
+        float weight;
+
+        switch (choice.skillData.rarity)
+        {
+            case SkillRarity.Common:
+                weight = commonWeight;
+                break;
+
+            case SkillRarity.Rare:
+                weight = rareWeight;
+                break;
+
+            case SkillRarity.Epic:
+                weight = epicWeight;
+                break;
+
+            default:
+                weight = commonWeight;
+                break;
+        }
+
+        return Mathf.Max(0f, weight);
     }
 
 

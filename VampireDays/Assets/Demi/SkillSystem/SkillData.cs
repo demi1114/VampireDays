@@ -14,6 +14,9 @@ public class SkillData : ScriptableObject
     [Header("í—Ş")]
     public SkillType skillType;
 
+    [Header("ƒŒƒA“x")]
+    public SkillRarity rarity = SkillRarity.Common;
+
     [Header("’Êí”Å")]
     public SkillVariantData normalData = new();
 

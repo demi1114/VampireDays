@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// 召喚マスター
+/// 眷属マスター
 ///
 /// 所持している召喚系スキルのCTを短縮する。
 /// 実際のCT計算はSkillManagerから行う。

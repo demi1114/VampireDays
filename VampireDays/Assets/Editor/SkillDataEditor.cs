@@ -14,6 +14,7 @@ public class SkillDataEditor : Editor
     private SerializedProperty skillTypeProp;
     private SerializedProperty normalDataProp;
     private SerializedProperty enhancementListProp;
+    private SerializedProperty rarityProp;
 
     private void OnEnable()
     {
@@ -23,6 +24,7 @@ public class SkillDataEditor : Editor
         normalDataProp = serializedObject.FindProperty("normalData");
         enhancementListProp =
             serializedObject.FindProperty("enhancementList");
+        rarityProp = serializedObject.FindProperty("rarity");
     }
 
     public override void OnInspectorGUI()
@@ -38,12 +40,14 @@ public class SkillDataEditor : Editor
         EditorGUILayout.PropertyField(idProp, new GUIContent("ID"));
         EditorGUILayout.PropertyField(
             skillNameProp,
-            new GUIContent("スキル名")
-        );
+            new GUIContent("スキル名"));
+
         EditorGUILayout.PropertyField(
             skillTypeProp,
-            new GUIContent("スキル種類")
-        );
+            new GUIContent("スキル種類"));
+
+        EditorGUILayout.PropertyField(
+            rarityProp,new GUIContent("レア度"));
 
         EditorGUILayout.Space(10);
 

@@ -15,6 +15,7 @@ MonoBehaviour:
   id: 11
   skillName: "\u59CB\u7956\u306E\u9BAE\u8840"
   skillType: 2
+  rarity: 0
   normalData:
     enhancementType: 0
     icon: {fileID: 21300000, guid: 86729d38d2071124e937bfd75c66e71e, type: 3}
