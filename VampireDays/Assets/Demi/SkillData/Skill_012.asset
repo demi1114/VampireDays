@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b9a3409d6c975784ca62fa24fa421649, type: 3}
+  m_Name: Skill_012
+  m_EditorClassIdentifier: Assembly-CSharp::SkillData
+  id: 4
+  skillName: "\u9B45\u4E86\u306E\u77B3"
+  skillType: 1
+  normalData:
+    enhancementType: 0
+    icon: {fileID: 21300000, guid: 86729d38d2071124e937bfd75c66e71e, type: 3}
+    description: "\u9B45\u4E86\u306E\u77B3"
+    coolTime: 1
+    duration: 0
+    spawnCount: 1
+    resetChance: 0
+    spawnPosition: 0
+    forwardDistance: 2
+    randomRadius: 3
+    prefab: {fileID: 0}
+    lifeTime: 0
+    dropMultiplier: 1
+    recoveryMultiplier: 1
+    drainTimeMultiplier: 1
+    moveSpeedMultiplier: 1
+    magicCoolTimeReduction: 0
+    summonCoolTimeReduction: 0
+    castEffect: {fileID: 0}
+    castSE: {fileID: 0}
+    destroySE: {fileID: 0}
+  enhancementList: []

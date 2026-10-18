@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b9a3409d6c975784ca62fa24fa421649, type: 3}
-  m_Name: Skill
+  m_Name: Skill_019
   m_EditorClassIdentifier: Assembly-CSharp::SkillData
-  id: 100
-  skillName: "\u591C\u306E\u3068\u3070\u308A"
+  id: 19
+  skillName: "\u30D6\u30E9\u30C3\u30AF\u30A2\u30A6\u30C8"
   skillType: 1
   normalData:
     enhancementType: 0
@@ -29,7 +29,11 @@ MonoBehaviour:
     prefab: {fileID: 0}
     lifeTime: 0
     dropMultiplier: 1
+    recoveryMultiplier: 1
     drainTimeMultiplier: 1
+    moveSpeedMultiplier: 1
+    magicCoolTimeReduction: 0
+    summonCoolTimeReduction: 0
     castEffect: {fileID: 0}
     castSE: {fileID: 0}
     destroySE: {fileID: 0}

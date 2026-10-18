@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b9a3409d6c975784ca62fa24fa421649, type: 3}
-  m_Name: Skill00
+  m_Name: Skill_004
   m_EditorClassIdentifier: Assembly-CSharp::SkillData
-  id: 0
-  skillName: "\u7737\u5C5E\u30D0\u30C3\u30C8\u53EC\u559A"
+  id: 4
+  skillName: "\u30AD\u30F3\u30B0\u30D0\u30C3\u30C8\u53EC\u559A"
   skillType: 0
   normalData:
     enhancementType: 0
     icon: {fileID: 21300000, guid: 86729d38d2071124e937bfd75c66e71e, type: 3}
-    description: "\u7737\u5C5E\u30D0\u30C3\u30C8\u53EC\u559A"
+    description: "\u7737\u5C5E\u306E\u30D0\u30C3\u30C8\u3092\u53EC\u559A\u3059\u308B\u3002\n\u30D0\u30C3\u30C8\u306F\u8996\u7DDA\u3092\u8A98\u5C0E\u3059\u308B\u52B9\u679C\u3092\u6301\u3064\u3002"
     coolTime: 10
     duration: 10
     spawnCount: 3
@@ -28,12 +28,18 @@ MonoBehaviour:
     randomRadius: 8
     prefab: {fileID: 1228495754462396995, guid: ba6e77487edbea645a4b3b63c4133b3c, type: 3}
     lifeTime: 10
+    dropMultiplier: 1
+    recoveryMultiplier: 1
+    drainTimeMultiplier: 1
+    moveSpeedMultiplier: 1
+    magicCoolTimeReduction: 0
+    summonCoolTimeReduction: 0
     castEffect: {fileID: 0}
     castSE: {fileID: 0}
     destroySE: {fileID: 0}
   enhancementList:
   - enhancementType: 1
-    icon: {fileID: 21300000, guid: 86729d38d2071124e937bfd75c66e71e, type: 3}
+    icon: {fileID: 21300000, guid: ac1bdbd508306ea44bd13ba0bae2aeba, type: 3}
     description: "\u30A8\u30E1\u30E9\u30EB\u30C9"
     coolTime: 15
     duration: 10
@@ -44,11 +50,17 @@ MonoBehaviour:
     randomRadius: 8
     prefab: {fileID: 1228495754462396995, guid: ba6e77487edbea645a4b3b63c4133b3c, type: 3}
     lifeTime: 10
+    dropMultiplier: 1
+    recoveryMultiplier: 1
+    drainTimeMultiplier: 1
+    moveSpeedMultiplier: 1
+    magicCoolTimeReduction: 0
+    summonCoolTimeReduction: 0
     castEffect: {fileID: 0}
     castSE: {fileID: 0}
     destroySE: {fileID: 0}
   - enhancementType: 2
-    icon: {fileID: 21300000, guid: 86729d38d2071124e937bfd75c66e71e, type: 3}
+    icon: {fileID: 21300000, guid: d5c775ffc92e654439a1c971cae583b6, type: 3}
     description: "\u30B5\u30D5\u30A1\u30A4\u30A2"
     coolTime: 3
     duration: 10
@@ -59,11 +71,17 @@ MonoBehaviour:
     randomRadius: 8
     prefab: {fileID: 1228495754462396995, guid: ba6e77487edbea645a4b3b63c4133b3c, type: 3}
     lifeTime: 10
+    dropMultiplier: 1
+    recoveryMultiplier: 1
+    drainTimeMultiplier: 1
+    moveSpeedMultiplier: 1
+    magicCoolTimeReduction: 0
+    summonCoolTimeReduction: 0
     castEffect: {fileID: 0}
     castSE: {fileID: 0}
     destroySE: {fileID: 0}
   - enhancementType: 3
-    icon: {fileID: 21300000, guid: 86729d38d2071124e937bfd75c66e71e, type: 3}
+    icon: {fileID: 21300000, guid: 477f1a6e724e23843b47d133b07c9a31, type: 3}
     description: "\u30EB\u30D3\u30FC"
     coolTime: 9
     duration: 10
@@ -74,11 +92,17 @@ MonoBehaviour:
     randomRadius: 8
     prefab: {fileID: 1228495754462396995, guid: ba6e77487edbea645a4b3b63c4133b3c, type: 3}
     lifeTime: 10
+    dropMultiplier: 1
+    recoveryMultiplier: 1
+    drainTimeMultiplier: 1
+    moveSpeedMultiplier: 1
+    magicCoolTimeReduction: 0
+    summonCoolTimeReduction: 0
     castEffect: {fileID: 0}
     castSE: {fileID: 0}
     destroySE: {fileID: 0}
   - enhancementType: 4
-    icon: {fileID: 21300000, guid: 86729d38d2071124e937bfd75c66e71e, type: 3}
+    icon: {fileID: 21300000, guid: 833cebc0ee900704c98607c31fe9a9d6, type: 3}
     description: "\u30AA\u30D1\u30FC\u30EB"
     coolTime: 10
     duration: 10
@@ -89,6 +113,12 @@ MonoBehaviour:
     randomRadius: 8
     prefab: {fileID: 1228495754462396995, guid: ba6e77487edbea645a4b3b63c4133b3c, type: 3}
     lifeTime: 10
+    dropMultiplier: 1
+    recoveryMultiplier: 1
+    drainTimeMultiplier: 1
+    moveSpeedMultiplier: 1
+    magicCoolTimeReduction: 0
+    summonCoolTimeReduction: 0
     castEffect: {fileID: 0}
     castSE: {fileID: 0}
     destroySE: {fileID: 0}
