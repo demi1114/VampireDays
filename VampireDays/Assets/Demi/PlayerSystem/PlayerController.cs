@@ -45,23 +45,35 @@ public class PlayerController : MonoBehaviour
     }
 
 
+
     private void OnEnable()
     {
-        moveAction.action.Enable();
+        if (moveAction != null && moveAction.action != null)
+        {
+            moveAction.action.Enable();
+        }
     }
-
 
     private void OnDisable()
     {
-        moveAction.action.Disable();
+        if (moveAction != null && moveAction.action != null)
+        {
+            moveAction.action.Disable();
+        }
     }
-
 
     private void Update()
     {
+        if (moveAction == null || moveAction.action == null)
+        {
+            moveInput = Vector2.zero;
+            return;
+        }
+
         moveInput =
             moveAction.action.ReadValue<Vector2>();
     }
+
 
 
     private void FixedUpdate()

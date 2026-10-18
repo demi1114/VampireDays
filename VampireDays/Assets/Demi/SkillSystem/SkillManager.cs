@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 /// <summary>
 /// プレイヤーのスキルを管理する
@@ -110,37 +111,14 @@ public class SkillManager : MonoBehaviour
             $"スキル取得 : {skillData.skillName}"
         );
 
-
-        //==================================================
-        // 召喚スキル取得時
-        //==================================================
-
-        if (skillData.skillType == SkillType.Summon)
-        {
-            // 取得した瞬間から
-            // 召喚マスターの効果を適用
-            runtimeSkill.currentCoolTime =
-                GetActualCoolTime(runtimeSkill);
-
-            Debug.Log(
-                $"召喚スキル初期CT : " +
-                $"{runtimeSkill.currentCoolTime:F2}秒"
-            );
-        }
-
-
-        //==================================================
-        // Passive取得時
-        //==================================================
-
+        // パッシブ取得時は、既存の魔法・召喚スキルを再計算
         if (skillData.skillType == SkillType.Passive)
         {
-            // すでに存在する召喚スキルへ
-            // 召喚マスターの効果を即時反映
-            ApplySummonCoolTimeReduction();
+            RefreshSkillCoolTimes();
         }
 
         return true;
+
     }
 
 
@@ -177,11 +155,11 @@ public class SkillManager : MonoBehaviour
             $"{enhancementType}"
         );
 
-        // Passiveの強化によって
         // 召喚CT短縮率が変化する可能性があるため即時反映
-        if (skillData.skillType == SkillType.Passive)
-        {
-            RefreshSummonCoolTimes();
+        if(skillData.skillType == SkillType.Passive)
+{
+            // 強化後の短縮率を使って再計算
+            RefreshSkillCoolTimes();
         }
 
         return true;
@@ -449,39 +427,40 @@ public class SkillManager : MonoBehaviour
     /// <summary>
     /// 所持スキルのCTを更新する
     /// </summary>
+    /// <summary>
+    /// 所持スキルのCTを更新する
+    /// </summary>
     private void UpdateSkills()
     {
         foreach (RuntimeSkill skill in currentSkills)
         {
-            if (skill == null)
+            if (skill == null || skill.skillData == null)
                 continue;
 
-            if (skill.skillData == null)
-                continue;
-
-            SkillVariantData variant =
-                skill.Variant;
+            SkillVariantData variant = skill.Variant;
 
             if (variant == null)
                 continue;
 
-            // PassiveはCTを使用しない
-            if (skill.skillData.skillType ==
-                SkillType.Passive)
+            // パッシブ系はCTによる発動を行わない
+            if (skill.skillData.skillType == SkillType.Passive)
+                continue;
+
+            // 取得直後、または強化形態に変更した直後
+            if (!skill.hasActivated)
             {
+                ActivateSkill(skill);
                 continue;
             }
 
-            skill.currentCoolTime -=
-                Time.deltaTime;
+            // CTを減少させる
+            skill.currentCoolTime -= Time.deltaTime;
 
+            // CT終了時に再発動
             if (skill.currentCoolTime <= 0f)
             {
-                skill.currentCoolTime = 0f;
-
                 Debug.Log(
-                    $"CT終了 : " +
-                    $"{skill.skillData.skillName}"
+                    $"CT終了 : {skill.skillData.skillName}"
                 );
 
                 ActivateSkill(skill);
@@ -494,45 +473,48 @@ public class SkillManager : MonoBehaviour
     // スキル発動
     //==================================================
 
-    private void ActivateSkill(
-      RuntimeSkill skill)
+    /// <summary>
+    /// スキルを発動する
+    /// </summary>
+    private void ActivateSkill(RuntimeSkill skill)
     {
-        if (skill == null)
+        if (skill == null || skill.skillData == null)
             return;
 
-        if (skill.skillData == null)
+        // パッシブ系は発動処理を行わない
+        if (skill.skillData.skillType == SkillType.Passive)
             return;
 
-        SkillVariantData variant =
-            skill.Variant;
+        SkillVariantData variant = skill.Variant;
 
         if (variant == null)
         {
             Debug.LogError(
-                $"Variantがありません : " +
-                $"{skill.skillData.skillName}"
+                $"Variantがありません : {skill.skillData.skillName}"
             );
-
             return;
         }
 
         Debug.Log(
-            $"【スキル発動】" +
-            $"{skill.skillData.skillName}"
+            $"【スキル発動】{skill.skillData.skillName}"
         );
 
-        SpawnSkillObject(
-            skill,
-            variant
-        );
+        // 召喚系・魔法系ともに、設定されたPrefabを生成する。
+        // 魔法の効果はPrefab側の個別スクリプトで実装する。
+        SpawnSkillObject(skill, variant);
 
-        // 召喚マスターを考慮したCT
+        // 召喚マスターの効果を考慮してCTをリセット
+        skill.currentCoolTimeDuration =
+    GetActualCoolTime(skill);
+
         skill.currentCoolTime =
-            GetActualCoolTime(skill);
+            skill.currentCoolTimeDuration;
+
+        // 取得直後の初回発動を完了
+        skill.hasActivated = true;
 
         Debug.Log(
-            $"次回CT : " +
-            $"{skill.currentCoolTime:F2}秒"
+            $"次回CT : {skill.currentCoolTime:F2}秒"
         );
     }
 
@@ -662,15 +644,16 @@ public class SkillManager : MonoBehaviour
     }
 
 
-    //==================================================
-    // カーソル位置
-    //==================================================
 
+    /// <summary>
+    /// マウスカーソルのワールド座標を取得する
+    /// 新Input System対応
+    /// </summary>
     private Vector3 GetCursorWorldPosition()
     {
-        Camera cam =
-            Camera.main;
+        Camera cam = Camera.main;
 
+        // カメラが存在しない場合はプレイヤー位置を返す
         if (cam == null)
         {
             return playerTransform != null
@@ -678,11 +661,23 @@ public class SkillManager : MonoBehaviour
                 : transform.position;
         }
 
-        Ray ray =
-            cam.ScreenPointToRay(
-                Input.mousePosition
-            );
+        // マウスが使用できない場合もプレイヤー位置を返す
+        if (Mouse.current == null)
+        {
+            return playerTransform != null
+                ? playerTransform.position
+                : transform.position;
+        }
 
+        // 新Input Systemからマウス位置を取得
+        Vector2 mousePosition =
+            Mouse.current.position.ReadValue();
+
+        // マウス位置からカメラのレイを作成
+        Ray ray =
+            cam.ScreenPointToRay(mousePosition);
+
+        // プレイヤーと同じ高さの地面を設定
         float groundY =
             playerTransform != null
                 ? playerTransform.position.y
@@ -691,188 +686,158 @@ public class SkillManager : MonoBehaviour
         Plane groundPlane =
             new Plane(
                 Vector3.up,
-                new Vector3(
-                    0f,
-                    groundY,
-                    0f
-                )
+                new Vector3(0f, groundY, 0f)
             );
 
-        if (groundPlane.Raycast(
-            ray,
-            out float distance))
+        // レイと地面の交点を取得
+        if (groundPlane.Raycast(ray, out float distance))
         {
             return ray.GetPoint(distance);
         }
 
+        // 交点がない場合はプレイヤー位置を返す
         return playerTransform != null
             ? playerTransform.position
             : transform.position;
     }
 
+
     //==================================================
     // 召喚CT
     //==================================================
 
+
+    //==================================================
+    // 魔法・召喚CT短縮
+    //==================================================
+
     /// <summary>
-    /// 現在の召喚マスター効果を取得する
-    ///
-    /// 複数の召喚マスターが存在する場合は
-    /// 短縮率を加算する。
+    /// 指定した種類のスキルに対する
+    /// パッシブのCT短縮率を取得する。
     /// </summary>
-    private float GetSummonCoolTimeReduction()
+    private float GetCoolTimeReduction(SkillType targetType)
     {
         float reduction = 0f;
 
         foreach (RuntimeSkill skill in currentSkills)
         {
-            if (skill == null)
+            if (skill == null || skill.skillData == null)
                 continue;
 
-            if (skill.skillData == null)
+            // パッシブのみ対象
+            if (skill.skillData.skillType != SkillType.Passive)
                 continue;
 
-            // Passive以外は対象外
-            if (skill.skillData.skillType !=
-                SkillType.Passive)
-            {
-                continue;
-            }
-
-            SkillVariantData variant =
-                skill.Variant;
+            SkillVariantData variant = skill.Variant;
 
             if (variant == null)
                 continue;
 
-            reduction +=
-                variant.summonCoolTimeReduction;
+            switch (targetType)
+            {
+                case SkillType.Magic:
+                    reduction += variant.magicCoolTimeReduction;
+                    break;
+
+                case SkillType.Summon:
+                    reduction += variant.summonCoolTimeReduction;
+                    break;
+            }
         }
 
-        // 100%以上短縮されないようにする
+        // 短縮率の上限は100%
         return Mathf.Clamp01(reduction);
     }
 
-    //==================================================
-    // 召喚CT短縮の即時反映
-    //==================================================
-
     /// <summary>
-    /// 現在進行中の召喚スキルCTに
-    /// 召喚マスターの効果を即座に反映する。
+    /// 元のCTから、現在の短縮率を反映したCTを計算する。
     /// </summary>
-    private void ApplySummonCoolTimeReduction()
+    private float GetActualCoolTime(RuntimeSkill skill)
     {
-        float reduction =
-            GetSummonCoolTimeReduction();
-
-        foreach (RuntimeSkill skill in currentSkills)
-        {
-            if (skill == null)
-                continue;
-
-            if (skill.skillData == null)
-                continue;
-
-            // 召喚系のみ
-            if (skill.skillData.skillType !=
-                SkillType.Summon)
-            {
-                continue;
-            }
-
-            // すでにCTが終了している場合は何もしない
-            if (skill.currentCoolTime <= 0f)
-                continue;
-
-            skill.currentCoolTime *=
-                (1f - reduction);
-        }
-    }
-
-    /// <summary>
-    /// スキルの実際のCTを計算する
-    /// </summary>
-    private float GetActualCoolTime(
-        RuntimeSkill skill)
-    {
-        if (skill == null)
+        if (skill == null || skill.skillData == null)
             return 0f;
 
-        if (skill.skillData == null)
-            return 0f;
-
-        SkillVariantData variant =
-            skill.Variant;
+        SkillVariantData variant = skill.Variant;
 
         if (variant == null)
             return 0f;
 
-        float baseCoolTime =
-            Mathf.Max(
-                0f,
-                variant.coolTime
-            );
+        // 強化形態に設定されている元のCT
+        float baseCoolTime = Mathf.Max(0f, variant.coolTime);
 
-        // 召喚系のみ短縮
-        if (skill.skillData.skillType !=
-            SkillType.Summon)
+        SkillType type = skill.skillData.skillType;
+
+        // 魔法・召喚以外は短縮しない
+        if (type != SkillType.Magic &&
+            type != SkillType.Summon)
         {
             return baseCoolTime;
         }
 
-        float reduction =
-            GetSummonCoolTimeReduction();
+        float reduction = GetCoolTimeReduction(type);
 
-        return baseCoolTime *
-               (1f - reduction);
+        // 元のCTから毎回計算する
+        return baseCoolTime * (1f - reduction);
     }
 
-    private void RefreshSummonCoolTimes()
+    /// <summary>
+    /// パッシブの取得・強化時に、
+    /// 所持中の魔法・召喚スキルのCTを再計算する。
+    /// </summary>
+    private void RefreshSkillCoolTimes()
     {
-        float reduction =
-            GetSummonCoolTimeReduction();
-
         foreach (RuntimeSkill skill in currentSkills)
         {
-            if (skill == null)
+            if (skill == null || skill.skillData == null)
                 continue;
 
-            if (skill.skillData == null)
-                continue;
+            SkillType type = skill.skillData.skillType;
 
-            if (skill.skillData.skillType !=
-                SkillType.Summon)
+            if (type != SkillType.Magic &&
+                type != SkillType.Summon)
             {
                 continue;
             }
 
+            // まだ初回発動していないスキルは、
+            // ActivateSkillで最新のCTを設定する
+            if (!skill.hasActivated)
+                continue;
+
+            float newDuration = GetActualCoolTime(skill);
+
+            // 発動待ちなら、残りCTは0のままにする
             if (skill.currentCoolTime <= 0f)
+            {
+                skill.currentCoolTimeDuration = newDuration;
                 continue;
+            }
 
-            // 現在の残りCTを、
-            // 現在の短縮率に合わせて再計算
-            float baseCoolTime =
-                skill.Variant != null
-                    ? skill.Variant.coolTime
-                    : 0f;
+            // 変更前のCTに対する残り時間の割合を維持
+            float remainingRatio = 1f;
 
-            if (baseCoolTime <= 0f)
-                continue;
-
-            float newCoolTime =
-                baseCoolTime *
-                (1f - reduction);
-
-            // 現在の残り時間が
-            // 新しい最大CTを超えないようにする
-            skill.currentCoolTime =
-                Mathf.Min(
-                    skill.currentCoolTime,
-                    newCoolTime
+            if (skill.currentCoolTimeDuration > 0f)
+            {
+                remainingRatio = Mathf.Clamp01(
+                    skill.currentCoolTime /
+                    skill.currentCoolTimeDuration
                 );
+            }
+
+            // 新しいCTを元のCTから再計算
+            skill.currentCoolTimeDuration = newDuration;
+
+            // 変更前の進行度を維持して残りCTを更新
+            skill.currentCoolTime =
+                newDuration * remainingRatio;
+
+            Debug.Log(
+                $"CT再計算 : {skill.skillData.skillName} / " +
+                $"残りCT {skill.currentCoolTime:F2}秒"
+            );
         }
     }
+
 
     //==================================================
     // 対象敵位置

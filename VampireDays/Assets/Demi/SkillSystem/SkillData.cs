@@ -109,9 +109,16 @@ public class SkillVariantData
     [Min(1f)]
     public float moveSpeedMultiplier = 1f;
 
+    [Header("–‚–@CT’Zk")]
+    [Tooltip("–‚–@ƒXƒLƒ‹‚ÌCT’Zk—¦B0.2‚È‚ç20%’Zk")]
+    [Range(0f, 1f)]
+    public float magicCoolTimeReduction = 0f;
+
     [Header("¢Š«CT’Zk")]
+    [Tooltip("¢Š«ƒXƒLƒ‹‚ÌCT’Zk—¦B0.2‚È‚ç20%’Zk")]
     [Range(0f, 1f)]
     public float summonCoolTimeReduction = 0f;
+
 
     [Header("‰‰o")]
     public GameObject castEffect;

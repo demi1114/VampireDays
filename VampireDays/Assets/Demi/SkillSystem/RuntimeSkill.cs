@@ -17,10 +17,13 @@ public class RuntimeSkill
     public EnhancementType enhancementType =
         EnhancementType.Normal;
 
+    public bool hasActivated = false;
+
     /// <summary>
     /// 現在のCT
     /// </summary>
     public float currentCoolTime;
+    public float currentCoolTimeDuration;
 
     /// <summary>
     /// 現在使用しているデータ
@@ -39,48 +42,26 @@ public class RuntimeSkill
     }
 
 
-    //==================================================
-    // コンストラクタ
-    //==================================================
-
-    public RuntimeSkill(
-        SkillData skillData)
+    public RuntimeSkill(SkillData skillData)
     {
         this.skillData = skillData;
+        enhancementType = EnhancementType.Normal;
 
-        enhancementType =
-            EnhancementType.Normal;
+        // 初期CTを設定
+        currentCoolTime = Variant.coolTime;
 
-        SkillVariantData variant =
-            Variant;
-
-        currentCoolTime =
-            variant != null
-                ? variant.coolTime
-                : 0f;
+        // まだ初回発動していない
+        hasActivated = false;
     }
 
-
-    //==================================================
-    // 強化形態変更
-    //==================================================
-
-    public void ChangeEnhancement(
-        EnhancementType type)
+    public void ChangeEnhancement(EnhancementType newType)
     {
-        if (skillData == null)
-            return;
+        enhancementType = newType;
 
-        SkillVariantData variant =
-            skillData.GetVariant(type);
+        // 強化後のCTに変更
+        currentCoolTime = Variant.coolTime;
 
-        if (variant == null)
-            return;
-
-        enhancementType = type;
-
-        // CTリセット
-        currentCoolTime =
-            variant.coolTime;
+        // 強化形態への変更後は初回発動を行う
+        hasActivated = false;
     }
 }
