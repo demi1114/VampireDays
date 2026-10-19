@@ -27,7 +27,7 @@ MonoBehaviour:
     spawnPosition: 0
     forwardDistance: 2
     randomRadius: 3
-    prefab: {fileID: 1228495754462396995, guid: 27a1600f80f983a408c0b9d49f59ee32, type: 3}
+    prefab: {fileID: 100000, guid: fdad9d952ae84cafb74c63f2e694d042, type: 3}
     lifeTime: 0
     dropMultiplier: 1
     recoveryMultiplier: 1
