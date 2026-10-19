@@ -38,4 +38,88 @@ MonoBehaviour:
     castEffect: {fileID: 0}
     castSE: {fileID: 0}
     destroySE: {fileID: 0}
-  enhancementList: []
+  enhancementList:
+  - enhancementType: 1
+    icon: {fileID: 0}
+    description: 
+    coolTime: 0
+    duration: 0
+    spawnCount: 0
+    resetChance: 0
+    spawnPosition: 0
+    forwardDistance: 0
+    randomRadius: 0
+    prefab: {fileID: 0}
+    lifeTime: 0
+    dropMultiplier: 0
+    recoveryMultiplier: 0
+    drainTimeMultiplier: 0
+    moveSpeedMultiplier: 0
+    magicCoolTimeReduction: 0
+    summonCoolTimeReduction: 0
+    castEffect: {fileID: 0}
+    castSE: {fileID: 0}
+    destroySE: {fileID: 0}
+  - enhancementType: 0
+    icon: {fileID: 0}
+    description: 
+    coolTime: 0
+    duration: 0
+    spawnCount: 0
+    resetChance: 0
+    spawnPosition: 0
+    forwardDistance: 0
+    randomRadius: 0
+    prefab: {fileID: 0}
+    lifeTime: 0
+    dropMultiplier: 0
+    recoveryMultiplier: 0
+    drainTimeMultiplier: 0
+    moveSpeedMultiplier: 0
+    magicCoolTimeReduction: 0
+    summonCoolTimeReduction: 0
+    castEffect: {fileID: 0}
+    castSE: {fileID: 0}
+    destroySE: {fileID: 0}
+  - enhancementType: 0
+    icon: {fileID: 0}
+    description: 
+    coolTime: 0
+    duration: 0
+    spawnCount: 0
+    resetChance: 0
+    spawnPosition: 0
+    forwardDistance: 0
+    randomRadius: 0
+    prefab: {fileID: 0}
+    lifeTime: 0
+    dropMultiplier: 0
+    recoveryMultiplier: 0
+    drainTimeMultiplier: 0
+    moveSpeedMultiplier: 0
+    magicCoolTimeReduction: 0
+    summonCoolTimeReduction: 0
+    castEffect: {fileID: 0}
+    castSE: {fileID: 0}
+    destroySE: {fileID: 0}
+  - enhancementType: 0
+    icon: {fileID: 0}
+    description: 
+    coolTime: 0
+    duration: 0
+    spawnCount: 0
+    resetChance: 0
+    spawnPosition: 0
+    forwardDistance: 0
+    randomRadius: 0
+    prefab: {fileID: 0}
+    lifeTime: 0
+    dropMultiplier: 0
+    recoveryMultiplier: 0
+    drainTimeMultiplier: 0
+    moveSpeedMultiplier: 0
+    magicCoolTimeReduction: 0
+    summonCoolTimeReduction: 0
+    castEffect: {fileID: 0}
+    castSE: {fileID: 0}
+    destroySE: {fileID: 0}

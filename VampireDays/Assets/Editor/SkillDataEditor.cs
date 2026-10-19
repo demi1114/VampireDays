@@ -5,6 +5,7 @@ using UnityEditor;
 /// <summary>
 /// SkillData専用のカスタムInspector。
 /// スキル種類に応じて表示する項目を切り替える。
+/// 強化形態の追加・削除・編集に対応。
 /// </summary>
 [CustomEditor(typeof(SkillData))]
 public class SkillDataEditor : Editor
@@ -31,7 +32,10 @@ public class SkillDataEditor : Editor
     {
         serializedObject.Update();
 
+        //========================================
         // 基本情報
+        //========================================
+
         EditorGUILayout.LabelField(
             "基本情報",
             EditorStyles.boldLabel
@@ -40,18 +44,23 @@ public class SkillDataEditor : Editor
         EditorGUILayout.PropertyField(idProp, new GUIContent("ID"));
         EditorGUILayout.PropertyField(
             skillNameProp,
-            new GUIContent("スキル名"));
-
+            new GUIContent("スキル名")
+        );
         EditorGUILayout.PropertyField(
             skillTypeProp,
-            new GUIContent("スキル種類"));
-
+            new GUIContent("スキル種類")
+        );
         EditorGUILayout.PropertyField(
-            rarityProp,new GUIContent("レア度"));
+            rarityProp,
+            new GUIContent("レア度")
+        );
 
         EditorGUILayout.Space(10);
 
+        //========================================
         // 通常版
+        //========================================
+
         EditorGUILayout.LabelField(
             "通常版",
             EditorStyles.boldLabel
@@ -61,27 +70,53 @@ public class SkillDataEditor : Editor
 
         EditorGUILayout.Space(10);
 
-        // 強化版一覧
+        //========================================
+        // 強化形態一覧
+        //========================================
+
         EditorGUILayout.LabelField(
-            "強化版一覧",
+            "強化形態一覧",
             EditorStyles.boldLabel
         );
 
-        EditorGUILayout.PropertyField(
-            enhancementListProp,
-            new GUIContent("強化形態"),
-            false
-        );
+        if (enhancementListProp == null)
+        {
+            EditorGUILayout.HelpBox(
+                "SkillDataにenhancementListが見つかりません。",
+                MessageType.Error
+            );
+
+            serializedObject.ApplyModifiedProperties();
+            return;
+        }
+
+        // 一覧を折りたたみ可能にする
+        enhancementListProp.isExpanded =
+            EditorGUILayout.Foldout(
+                enhancementListProp.isExpanded,
+                $"強化形態 ({enhancementListProp.arraySize})",
+                true
+            );
 
         if (enhancementListProp.isExpanded)
         {
             EditorGUI.indentLevel++;
 
-            EditorGUILayout.PropertyField(
-                enhancementListProp.FindPropertyRelative("Array.size"),
-                new GUIContent("要素数")
+            EditorGUILayout.HelpBox(
+                "Sizeで強化形態の数を変更できます。"
+                + "各項目を展開して設定してください。",
+                MessageType.Info
             );
 
+            // 配列サイズを表示し、追加・削除を可能にする
+            EditorGUILayout.PropertyField(
+                enhancementListProp.FindPropertyRelative("Array.size"),
+                new GUIContent("強化形態の数")
+            );
+
+            EditorGUILayout.Space(5);
+
+            // 各強化形態を表示
             for (int i = 0;
                  i < enhancementListProp.arraySize;
                  i++)
@@ -92,28 +127,53 @@ public class SkillDataEditor : Editor
                 SerializedProperty typeProp =
                     element.FindPropertyRelative("enhancementType");
 
-                string typeName = "強化版 " + (i + 1);
+                string typeName = $"強化形態 {i + 1}";
 
-                if (typeProp != null)
+                if (typeProp != null &&
+                    typeProp.propertyType == SerializedPropertyType.Enum)
                 {
                     typeName =
-                        typeProp.enumDisplayNames[
-                            typeProp.enumValueIndex
-                        ];
+                        typeProp.enumDisplayNames[typeProp.enumValueIndex];
                 }
 
-                element.isExpanded = EditorGUILayout.Foldout(
-                    element.isExpanded,
-                    typeName,
-                    true
+                EditorGUILayout.BeginVertical(
+                    EditorStyles.helpBox
                 );
+
+                EditorGUILayout.BeginHorizontal();
+
+                element.isExpanded =
+                    EditorGUILayout.Foldout(
+                        element.isExpanded,
+                        typeName,
+                        true
+                    );
+
+                // 選択中の要素を削除
+                if (GUILayout.Button(
+                    "削除",
+                    GUILayout.Width(50)))
+                {
+                    enhancementListProp.DeleteArrayElementAtIndex(i);
+                    EditorGUILayout.EndHorizontal();
+                    EditorGUILayout.EndVertical();
+                    break;
+                }
+
+                EditorGUILayout.EndHorizontal();
 
                 if (element.isExpanded)
                 {
                     EditorGUI.indentLevel++;
+
                     DrawVariant(element);
+
                     EditorGUI.indentLevel--;
                 }
+
+                EditorGUILayout.EndVertical();
+
+                EditorGUILayout.Space(3);
             }
 
             EditorGUI.indentLevel--;
@@ -123,19 +183,30 @@ public class SkillDataEditor : Editor
     }
 
     /// <summary>
-    /// スキル種類に応じてVariantの項目を表示する。
+    /// スキル種類に応じてVariantの設定項目を表示する。
     /// </summary>
     private void DrawVariant(SerializedProperty variant)
     {
         if (variant == null)
+        {
+            EditorGUILayout.HelpBox(
+                "設定データが見つかりません。",
+                MessageType.Warning
+            );
             return;
+        }
 
+        // 現在選択されているスキル種類を参照
         SkillData data = (SkillData)target;
         SkillType type = data.skillType;
 
+        // 強化形態ごとに独立した設定欄を表示
         EditorGUI.indentLevel++;
 
-        // 共通項目
+        //========================================
+        // 表示設定
+        //========================================
+
         EditorGUILayout.LabelField(
             "表示設定",
             EditorStyles.boldLabel
@@ -149,9 +220,9 @@ public class SkillDataEditor : Editor
 
         if (type == SkillType.Passive)
         {
-            //========================================
+            //====================================
             // パッシブスキル
-            //========================================
+            //====================================
 
             EditorGUILayout.LabelField(
                 "パッシブ効果",
@@ -184,9 +255,9 @@ public class SkillDataEditor : Editor
         }
         else
         {
-            //========================================
+            //====================================
             // 召喚・魔法スキル
-            //========================================
+            //====================================
 
             EditorGUILayout.LabelField(
                 "基本性能",
@@ -210,7 +281,8 @@ public class SkillDataEditor : Editor
             SerializedProperty spawnPositionProp =
                 variant.FindPropertyRelative("spawnPosition");
 
-            if (spawnPositionProp != null)
+            if (spawnPositionProp != null &&
+                spawnPositionProp.propertyType == SerializedPropertyType.Enum)
             {
                 SpawnPositionType positionType =
                     (SpawnPositionType)spawnPositionProp.enumValueIndex;
@@ -253,13 +325,17 @@ public class SkillDataEditor : Editor
     }
 
     /// <summary>
-    /// 指定したSerializedPropertyを表示する。
+    /// 指定されたSerializedPropertyを表示する。
+    /// 存在しないフィールドは表示しない。
     /// </summary>
     private void DrawField(
         SerializedProperty parent,
         string propertyName,
         string label)
     {
+        if (parent == null)
+            return;
+
         SerializedProperty property =
             parent.FindPropertyRelative(propertyName);
 
