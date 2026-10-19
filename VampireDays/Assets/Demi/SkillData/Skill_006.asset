@@ -15,9 +15,10 @@ MonoBehaviour:
   id: 6
   skillName: "\u30C9\u30ED\u30C3\u30D7UP"
   skillType: 2
+  rarity: 0
   normalData:
     enhancementType: 0
-    icon: {fileID: 21300000, guid: 86729d38d2071124e937bfd75c66e71e, type: 3}
+    icon: {fileID: 21300000, guid: 38aa02d4af478ce4c8aedbd0a7b688f4, type: 3}
     description: "\u30C9\u30ED\u30C3\u30D7UP"
     coolTime: 0
     duration: 0
@@ -29,7 +30,11 @@ MonoBehaviour:
     prefab: {fileID: 0}
     lifeTime: 0
     dropMultiplier: 1.2
+    recoveryMultiplier: 1
     drainTimeMultiplier: 1
+    moveSpeedMultiplier: 1
+    magicCoolTimeReduction: 0
+    summonCoolTimeReduction: 0
     castEffect: {fileID: 0}
     castSE: {fileID: 0}
     destroySE: {fileID: 0}

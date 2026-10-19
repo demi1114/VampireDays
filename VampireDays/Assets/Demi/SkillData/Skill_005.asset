@@ -15,9 +15,10 @@ MonoBehaviour:
   id: 5
   skillName: "\u30B9\u30D4\u30FC\u30C9UP"
   skillType: 2
+  rarity: 0
   normalData:
     enhancementType: 0
-    icon: {fileID: 21300000, guid: 86729d38d2071124e937bfd75c66e71e, type: 3}
+    icon: {fileID: 21300000, guid: 6e0b03c8325acbf4ca3bcd75a78e6e5e, type: 3}
     description: "\u30B9\u30D4\u30FC\u30C9UP"
     coolTime: 1
     duration: 0
