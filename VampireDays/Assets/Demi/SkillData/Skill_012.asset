@@ -18,7 +18,7 @@ MonoBehaviour:
   rarity: 0
   normalData:
     enhancementType: 0
-    icon: {fileID: 21300000, guid: f5d8879574a2c3d4ca8bb4dddb2108c2, type: 3}
+    icon: {fileID: 21300000, guid: 891e354cfe4c96c4eb39e3a0f2cad98e, type: 3}
     description: "\u9B45\u4E86\u306E\u77B3"
     coolTime: 5
     spawnCount: 5
