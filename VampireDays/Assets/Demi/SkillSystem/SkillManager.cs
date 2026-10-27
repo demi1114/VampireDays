@@ -30,6 +30,10 @@ public class SkillManager : MonoBehaviour
     [SerializeField]
     private Transform playerTransform;
 
+    [Header("パッシブエフェクト")]
+    [SerializeField]
+    private PassiveSkillEffectManager passiveEffectManager;
+
     [Header("特殊パッシブスキル")]
     [Tooltip("取得時に所持スキルを一斉発動するスキル")]
     [SerializeField]
@@ -46,6 +50,15 @@ public class SkillManager : MonoBehaviour
     //==================================================
     // Unity
     //==================================================
+
+    private void Awake()
+    {
+        if (passiveEffectManager == null)
+        {
+            passiveEffectManager =
+                GetComponent<PassiveSkillEffectManager>();
+        }
+    }
 
     private void Update()
     {
@@ -103,6 +116,14 @@ public class SkillManager : MonoBehaviour
 
         RuntimeSkill runtimeSkill = new RuntimeSkill(skillData);
         currentSkills.Add(runtimeSkill);
+
+        // パッシブスキルの取得時に常時エフェクトを表示する
+        if (skillData.skillType == SkillType.Passive &&
+            skillData != ancestralBloodSkillData &&
+            passiveEffectManager != null)
+        {
+            passiveEffectManager.RefreshEffect(runtimeSkill);
+        }
 
         Debug.Log($"スキル取得 : {skillData.skillName}");
 
@@ -216,7 +237,13 @@ public class SkillManager : MonoBehaviour
 
         if (ancestralBlood != null)
         {
+            if (passiveEffectManager != null)
+            {
+                passiveEffectManager.RemoveEffect(ancestralBlood);
+            }
+
             currentSkills.Remove(ancestralBlood);
+
             Debug.Log("【始祖の鮮血】所持リストから削除しました");
         }
 
@@ -244,6 +271,13 @@ public class SkillManager : MonoBehaviour
             return false;
 
         runtimeSkill.ChangeEnhancement(enhancementType);
+
+        // 強化形態に応じてパッシブエフェクトを置き換える
+        if (skillData.skillType == SkillType.Passive &&
+            passiveEffectManager != null)
+        {
+            passiveEffectManager.RefreshEffect(runtimeSkill);
+        }
 
         Debug.Log(
             $"スキル変更 : {skillData.skillName} → {enhancementType}"

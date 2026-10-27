@@ -1768,6 +1768,7 @@ GameObject:
   - component: {fileID: 434163827}
   - component: {fileID: 434163829}
   - component: {fileID: 434163828}
+  - component: {fileID: 434163830}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -2023,6 +2024,7 @@ MonoBehaviour:
   rareWeight: 25
   epicWeight: 5
   playerTransform: {fileID: 434163813}
+  passiveEffectManager: {fileID: 434163830}
   ancestralBloodSkillData: {fileID: 11400000, guid: 9f60cfcc4f138c64a946f22a87d8dc1d, type: 2}
 --- !u!114 &434163823
 MonoBehaviour:
@@ -2117,6 +2119,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MagicMasterSkill
   skillData: {fileID: 11400000, guid: 28c13756714cb914b86ae598f7f3b518, type: 2}
+--- !u!114 &434163830
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 434163809}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9522c3032e7d05c47bcadf3f3704e0d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PassiveSkillEffectManager
 --- !u!1 &441735578
 GameObject:
   m_ObjectHideFlags: 0
