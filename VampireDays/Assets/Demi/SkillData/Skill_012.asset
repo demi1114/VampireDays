@@ -15,26 +15,28 @@ MonoBehaviour:
   id: 4
   skillName: "\u9B45\u4E86\u306E\u77B3"
   skillType: 1
+  rarity: 0
   normalData:
     enhancementType: 0
-    icon: {fileID: 21300000, guid: 86729d38d2071124e937bfd75c66e71e, type: 3}
+    icon: {fileID: 21300000, guid: f5d8879574a2c3d4ca8bb4dddb2108c2, type: 3}
     description: "\u9B45\u4E86\u306E\u77B3"
-    coolTime: 1
-    duration: 0
-    spawnCount: 1
+    coolTime: 5
+    spawnCount: 5
     resetChance: 0
-    spawnPosition: 0
+    spawnPosition: 2
     forwardDistance: 2
-    randomRadius: 3
-    prefab: {fileID: 0}
-    lifeTime: 0
+    randomRadius: 20
+    summonPrefab: {fileID: 0}
+    magicEffectPrefab: {fileID: 3874635022589376825, guid: ffdfb7851a968494f8fe76ee88f3791a, type: 3}
+    passiveEffectPrefab: {fileID: 0}
+    summonLifetime: 0
+    castEffect: {fileID: 0}
+    castSE: {fileID: 0}
+    destroySE: {fileID: 0}
     dropMultiplier: 1
     recoveryMultiplier: 1
     drainTimeMultiplier: 1
     moveSpeedMultiplier: 1
     magicCoolTimeReduction: 0
     summonCoolTimeReduction: 0
-    castEffect: {fileID: 0}
-    castSE: {fileID: 0}
-    destroySE: {fileID: 0}
   enhancementList: []

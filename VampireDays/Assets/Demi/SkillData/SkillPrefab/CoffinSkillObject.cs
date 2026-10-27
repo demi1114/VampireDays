@@ -1,7 +1,10 @@
+
 using UnityEngine;
 
 /// <summary>
-/// 棺桶召喚スキルによって生成される棺桶
+/// 棺桶召喚スキルによって生成される棺桶。
+/// オブジェクト自体の寿命はSkillManagerが管理する。
+/// このクラスは移動、人間の捕獲、血液回収を担当する。
 /// </summary>
 public class CoffinSkillObject : MonoBehaviour, ISkillObject
 {
@@ -40,7 +43,6 @@ public class CoffinSkillObject : MonoBehaviour, ISkillObject
     //==================================================
 
     private Vector3 startPosition;
-
     private Vector3 targetPosition;
 
     //==================================================
@@ -48,16 +50,7 @@ public class CoffinSkillObject : MonoBehaviour, ISkillObject
     //==================================================
 
     private int bloodAmount = 1;
-
     private bool hasCaptured;
-
-    //==================================================
-    // ライフタイム
-    //==================================================
-
-    private float lifeTimer;
-
-    private float lifeTime;
 
     //==================================================
     // プレイヤー
@@ -73,34 +66,38 @@ public class CoffinSkillObject : MonoBehaviour, ISkillObject
     {
         runtimeSkill = skill;
 
-        startPosition =
-            transform.position;
+        startPosition = transform.position;
 
-        // スキルデータからLifeTimeを取得
-        if (runtimeSkill != null &&
-            runtimeSkill.Variant != null)
-        {
-            lifeTime =
-                runtimeSkill.Variant.lifeTime;
-        }
-
-        // プレイヤー取得
+        // プレイヤーを取得する。
         GameObject playerObject =
             GameObject.FindGameObjectWithTag("Player");
 
         if (playerObject != null)
         {
-            player =
-                playerObject.transform;
+            player = playerObject.transform;
+        }
+        else
+        {
+            Debug.LogWarning(
+                "CoffinSkillObject : Playerタグのオブジェクトが見つかりません。",
+                this
+            );
         }
 
-        // 最初の目的地
+        // 最初の目的地を設定する。
         SetRandomTarget();
 
         if (showDebugLog)
         {
+            string skillName =
+                runtimeSkill != null &&
+                runtimeSkill.skillData != null
+                    ? runtimeSkill.skillData.skillName
+                    : "不明";
+
             Debug.Log(
-                "CoffinSkillObject 初期化"
+                $"棺桶初期化 : {skillName}",
+                this
             );
         }
     }
@@ -111,38 +108,16 @@ public class CoffinSkillObject : MonoBehaviour, ISkillObject
 
     private void Update()
     {
-        UpdateLifeTime();
-
-        // 人間を捕獲するまでは移動
+        // 人間を捕獲するまでは移動・探索する。
         if (!hasCaptured)
         {
             MoveToTarget();
-
             SearchHuman();
-
             return;
         }
 
-        // 捕獲後はその場に留まる
+        // 捕獲後は、その場でプレイヤーの回収を待つ。
         CheckPlayerCollection();
-    }
-
-    //==================================================
-    // LifeTime
-    //==================================================
-
-    private void UpdateLifeTime()
-    {
-        // 0以下なら無制限
-        if (lifeTime <= 0f)
-            return;
-
-        lifeTimer += Time.deltaTime;
-
-        if (lifeTimer >= lifeTime)
-        {
-            Destroy(gameObject);
-        }
     }
 
     //==================================================
@@ -151,18 +126,15 @@ public class CoffinSkillObject : MonoBehaviour, ISkillObject
 
     private void MoveToTarget()
     {
-        transform.position =
-            Vector3.MoveTowards(
-                transform.position,
-                targetPosition,
-                moveSpeed *
-                Time.deltaTime
-            );
+        transform.position = Vector3.MoveTowards(
+            transform.position,
+            targetPosition,
+            moveSpeed * Time.deltaTime
+        );
 
         if (Vector3.Distance(
                 transform.position,
-                targetPosition)
-            <= arrivalDistance)
+                targetPosition) <= arrivalDistance)
         {
             SetRandomTarget();
         }
@@ -171,16 +143,10 @@ public class CoffinSkillObject : MonoBehaviour, ISkillObject
     private void SetRandomTarget()
     {
         Vector2 random =
-            Random.insideUnitCircle *
-            moveRange;
+            Random.insideUnitCircle * moveRange;
 
-        targetPosition =
-            startPosition +
-            new Vector3(
-                random.x,
-                0f,
-                random.y
-            );
+        targetPosition = startPosition +
+            new Vector3(random.x, 0f, random.y);
     }
 
     //==================================================
@@ -189,32 +155,29 @@ public class CoffinSkillObject : MonoBehaviour, ISkillObject
 
     private void SearchHuman()
     {
-        Collider[] hits =
-            Physics.OverlapSphere(
-                transform.position,
-                captureRadius
-            );
+        Collider[] hits = Physics.OverlapSphere(
+            transform.position,
+            captureRadius
+        );
 
         foreach (Collider hit in hits)
         {
             if (hit == null)
                 continue;
 
+            // Colliderが子オブジェクトにある場合も考慮する。
             HumanController human =
-                hit.GetComponent<HumanController>();
+                hit.GetComponentInParent<HumanController>();
 
             if (human == null)
                 continue;
 
-            // 吸血中の人間は対象外
+            // 吸血中の人間は捕獲対象外。
             if (human.IsBeingDrained)
                 continue;
 
-            // 人間を捕獲
             if (CaptureHuman(human))
-            {
                 break;
-            }
         }
     }
 
@@ -222,37 +185,30 @@ public class CoffinSkillObject : MonoBehaviour, ISkillObject
     // 人間捕獲
     //==================================================
 
-    private bool CaptureHuman(
-        HumanController human)
+    private bool CaptureHuman(HumanController human)
     {
-        if (human == null)
+        if (human == null || hasCaptured)
             return false;
 
-        if (hasCaptured)
-            return false;
-
-        // 血液量を保存
-        bloodAmount =
-            human.humanData != null
-                ? human.humanData.bloodAmount
-                : 1;
+        // 血液量を保存してから人間を削除する。
+        bloodAmount = human.humanData != null
+            ? human.humanData.bloodAmount
+            : 1;
 
         if (bloodAmount <= 0)
             bloodAmount = 1;
 
-        // 人間を削除
-        Destroy(human.gameObject);
-
-        // 捕獲済みにする
         hasCaptured = true;
 
         if (showDebugLog)
         {
             Debug.Log(
-                $"棺桶が人間を捕獲。" +
-                $"血液量 : {bloodAmount}"
+                $"棺桶が人間を捕獲。血液量 : {bloodAmount}",
+                this
             );
         }
+
+        Destroy(human.gameObject);
 
         return true;
     }
@@ -266,11 +222,10 @@ public class CoffinSkillObject : MonoBehaviour, ISkillObject
         if (player == null)
             return;
 
-        float distance =
-            Vector3.Distance(
-                transform.position,
-                player.position
-            );
+        float distance = Vector3.Distance(
+            transform.position,
+            player.position
+        );
 
         if (distance > collectRadius)
             return;
@@ -284,12 +239,8 @@ public class CoffinSkillObject : MonoBehaviour, ISkillObject
 
     private void CollectBlood()
     {
-        if (!hasCaptured)
+        if (!hasCaptured || player == null)
             return;
-
-        if (player == null)
-            return;
-
 
         PlayerLevel playerLevel =
             player.GetComponent<PlayerLevel>();
@@ -297,58 +248,38 @@ public class CoffinSkillObject : MonoBehaviour, ISkillObject
         if (playerLevel == null)
         {
             Debug.LogWarning(
-                "CoffinSkillObject : " +
-                "PlayerLevelが見つかりません。"
+                "CoffinSkillObject : PlayerLevelが見つかりません。",
+                this
             );
-
             return;
         }
 
-
-        //==============================================
-        // ドロップUP適用
-        //==============================================
-
-        int finalAmount =
-            bloodAmount;
-
+        // ドロップUPスキルを適用する。
+        int finalAmount = bloodAmount;
 
         DropUpSkill dropUpSkill =
             player.GetComponent<DropUpSkill>();
 
-
         if (dropUpSkill != null)
         {
-            finalAmount =
-                dropUpSkill.CalculateDropAmount(
-                    bloodAmount
-                );
+            finalAmount = dropUpSkill.CalculateDropAmount(
+                bloodAmount
+            );
         }
 
-
-        //==============================================
-        // 血液追加
-        //==============================================
-
-        playerLevel.AddBlood(
-            finalAmount
-        );
-
+        // 血液を追加する。
+        playerLevel.AddBlood(finalAmount);
 
         if (showDebugLog)
         {
             Debug.Log(
                 $"棺桶から血液取得 : " +
-                $"基本量={bloodAmount} / " +
-                $"最終量={finalAmount}"
+                $"基本量={bloodAmount} / 最終量={finalAmount}",
+                this
             );
         }
 
-
-        //==============================================
-        // 棺桶削除
-        //==============================================
-
+        // 回収後は棺桶を削除する。
         Destroy(gameObject);
     }
 
@@ -359,8 +290,7 @@ public class CoffinSkillObject : MonoBehaviour, ISkillObject
     private void OnDrawGizmosSelected()
     {
         // 移動範囲
-        Gizmos.color =
-            Color.yellow;
+        Gizmos.color = Color.yellow;
 
         Gizmos.DrawWireSphere(
             Application.isPlaying
@@ -370,8 +300,7 @@ public class CoffinSkillObject : MonoBehaviour, ISkillObject
         );
 
         // 人間捕獲範囲
-        Gizmos.color =
-            Color.red;
+        Gizmos.color = Color.red;
 
         Gizmos.DrawWireSphere(
             transform.position,
@@ -379,8 +308,7 @@ public class CoffinSkillObject : MonoBehaviour, ISkillObject
         );
 
         // プレイヤー回収範囲
-        Gizmos.color =
-            Color.green;
+        Gizmos.color = Color.green;
 
         Gizmos.DrawWireSphere(
             transform.position,

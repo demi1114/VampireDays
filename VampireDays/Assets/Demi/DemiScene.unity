@@ -5130,7 +5130,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
   gameTime: 300
-  damagePerSecond: 4
+  damagePerSecond: 0
 --- !u!4 &1206338978
 Transform:
   m_ObjectHideFlags: 0

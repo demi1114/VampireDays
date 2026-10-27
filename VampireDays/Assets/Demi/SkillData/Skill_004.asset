@@ -21,63 +21,66 @@ MonoBehaviour:
     icon: {fileID: 21300000, guid: 1e64d79cd83edfa4aab212b72b26ed9d, type: 3}
     description: "\u5927\u304D\u306A\u7737\u5C5E\u306E\u30D0\u30C3\u30C8\u3092\u53EC\u559A\u3059\u308B\u3002\n\u30D0\u30C3\u30C8\u306F\u8996\u7DDA\u3092\u8A98\u5C0E\u3059\u308B\u52B9\u679C\u3092\u6301\u3064\u3002"
     coolTime: 15
-    duration: 10
     spawnCount: 1
     resetChance: 0
     spawnPosition: 0
     forwardDistance: 2
     randomRadius: 8
-    prefab: {fileID: 1228495754462396995, guid: b7740ba2b771a39438787b7ea629dbf1, type: 3}
-    lifeTime: 10
+    summonPrefab: {fileID: 1228495754462396995, guid: b7740ba2b771a39438787b7ea629dbf1, type: 3}
+    magicEffectPrefab: {fileID: 0}
+    passiveEffectPrefab: {fileID: 0}
+    summonLifetime: 10
+    castEffect: {fileID: 0}
+    castSE: {fileID: 0}
+    destroySE: {fileID: 0}
     dropMultiplier: 1
     recoveryMultiplier: 1
     drainTimeMultiplier: 1
     moveSpeedMultiplier: 1
     magicCoolTimeReduction: 0
     summonCoolTimeReduction: 0
-    castEffect: {fileID: 0}
-    castSE: {fileID: 0}
-    destroySE: {fileID: 0}
   enhancementList:
   - enhancementType: 1
     icon: {fileID: 21300000, guid: f9346192a33a9504ba53ea2f10545129, type: 3}
     description: "\u30A8\u30E1\u30E9\u30EB\u30C9"
     coolTime: 15
-    duration: 10
     spawnCount: 2
     resetChance: 0
     spawnPosition: 0
     forwardDistance: 2
     randomRadius: 8
-    prefab: {fileID: 1228495754462396995, guid: b7740ba2b771a39438787b7ea629dbf1, type: 3}
-    lifeTime: 10
+    summonPrefab: {fileID: 1228495754462396995, guid: b7740ba2b771a39438787b7ea629dbf1, type: 3}
+    magicEffectPrefab: {fileID: 0}
+    passiveEffectPrefab: {fileID: 0}
+    summonLifetime: 10
+    castEffect: {fileID: 0}
+    castSE: {fileID: 0}
+    destroySE: {fileID: 0}
     dropMultiplier: 1
     recoveryMultiplier: 1
     drainTimeMultiplier: 1
     moveSpeedMultiplier: 1
     magicCoolTimeReduction: 0
     summonCoolTimeReduction: 0
-    castEffect: {fileID: 0}
-    castSE: {fileID: 0}
-    destroySE: {fileID: 0}
   - enhancementType: 4
     icon: {fileID: 21300000, guid: 8af304b4b4a22c943a9dacf9b13437f3, type: 3}
     description: "\u30AA\u30D1\u30FC\u30EB"
     coolTime: 15
-    duration: 10
     spawnCount: 4
     resetChance: 0
     spawnPosition: 0
     forwardDistance: 2
     randomRadius: 8
-    prefab: {fileID: 1228495754462396995, guid: b7740ba2b771a39438787b7ea629dbf1, type: 3}
-    lifeTime: 10
+    summonPrefab: {fileID: 1228495754462396995, guid: b7740ba2b771a39438787b7ea629dbf1, type: 3}
+    magicEffectPrefab: {fileID: 0}
+    passiveEffectPrefab: {fileID: 0}
+    summonLifetime: 10
+    castEffect: {fileID: 0}
+    castSE: {fileID: 0}
+    destroySE: {fileID: 0}
     dropMultiplier: 1
     recoveryMultiplier: 1
     drainTimeMultiplier: 1
     moveSpeedMultiplier: 1
     magicCoolTimeReduction: 0
     summonCoolTimeReduction: 0
-    castEffect: {fileID: 0}
-    castSE: {fileID: 0}
-    destroySE: {fileID: 0}

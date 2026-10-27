@@ -21,21 +21,22 @@ MonoBehaviour:
     icon: {fileID: 21300000, guid: 38aa02d4af478ce4c8aedbd0a7b688f4, type: 3}
     description: "\u30C9\u30ED\u30C3\u30D7UP"
     coolTime: 0
-    duration: 0
     spawnCount: 0
     resetChance: 0
     spawnPosition: 0
     forwardDistance: 0
     randomRadius: 0
-    prefab: {fileID: 0}
-    lifeTime: 0
+    summonPrefab: {fileID: 0}
+    magicEffectPrefab: {fileID: 0}
+    passiveEffectPrefab: {fileID: 5394012555071795783, guid: 5e7338eee589acc43a04573c88435c19, type: 3}
+    summonLifetime: 0
+    castEffect: {fileID: 0}
+    castSE: {fileID: 0}
+    destroySE: {fileID: 0}
     dropMultiplier: 1.2
     recoveryMultiplier: 1
     drainTimeMultiplier: 1
     moveSpeedMultiplier: 1
     magicCoolTimeReduction: 0
     summonCoolTimeReduction: 0
-    castEffect: {fileID: 0}
-    castSE: {fileID: 0}
-    destroySE: {fileID: 0}
   enhancementList: []

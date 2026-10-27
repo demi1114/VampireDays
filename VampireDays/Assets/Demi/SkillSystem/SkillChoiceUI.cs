@@ -1,10 +1,11 @@
+
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// レベルアップ時のスキル候補UIを管理する
+/// レベルアップ時のスキル候補UIを管理する。
 /// </summary>
 public class SkillChoiceUI : MonoBehaviour
 {
@@ -26,7 +27,8 @@ public class SkillChoiceUI : MonoBehaviour
         [Header("CT")]
         public TextMeshProUGUI coolTimeText;
 
-        [Header("持続時間")]
+        [Header("召喚寿命表示")]
+        [Tooltip("召喚スキルのオブジェクト寿命を表示する欄")]
         public TextMeshProUGUI durationText;
 
         [Header("出現数")]
@@ -56,7 +58,7 @@ public class SkillChoiceUI : MonoBehaviour
     //==================================================
 
     /// <summary>
-    /// 現在のスキル候補をUIへ反映
+    /// 現在のスキル候補をUIへ反映する。
     /// </summary>
     public void Refresh()
     {
@@ -66,7 +68,7 @@ public class SkillChoiceUI : MonoBehaviour
         IReadOnlyList<SkillChoiceData> choices =
             LevelUpManager.Instance.CurrentChoices;
 
-        // 全スロットを一旦非表示
+        // すべてのスロットを一旦非表示にする。
         for (int i = 0; i < choiceSlots.Count; i++)
         {
             ChoiceSlot slot = choiceSlots[i];
@@ -81,7 +83,7 @@ public class SkillChoiceUI : MonoBehaviour
                 slot.selectButton.onClick.RemoveAllListeners();
         }
 
-        // 候補を表示
+        // 候補を表示する。
         for (int i = 0; i < choices.Count; i++)
         {
             if (i >= choiceSlots.Count)
@@ -92,11 +94,7 @@ public class SkillChoiceUI : MonoBehaviour
             if (choice == null)
                 continue;
 
-            SetupChoice(
-                choiceSlots[i],
-                choice,
-                i
-            );
+            SetupChoice(choiceSlots[i], choice, i);
         }
     }
 
@@ -110,7 +108,7 @@ public class SkillChoiceUI : MonoBehaviour
         SkillChoiceData choice,
         int index)
     {
-        if (slot == null)
+        if (slot == null || choice == null)
             return;
 
         if (slot.root != null)
@@ -119,11 +117,12 @@ public class SkillChoiceUI : MonoBehaviour
         if (choice.skillData == null)
             return;
 
-        SkillVariantData variant =
-            choice.Variant;
+        SkillVariantData variant = choice.Variant;
 
         if (variant == null)
             return;
+
+        SkillType skillType = choice.skillData.skillType;
 
 
         //==================================================
@@ -133,9 +132,7 @@ public class SkillChoiceUI : MonoBehaviour
         if (slot.icon != null)
         {
             slot.icon.sprite = variant.icon;
-
-            slot.icon.enabled =
-                variant.icon != null;
+            slot.icon.enabled = variant.icon != null;
         }
 
 
@@ -167,9 +164,7 @@ public class SkillChoiceUI : MonoBehaviour
 
         if (slot.coolTimeText != null)
         {
-            // 強化系はCTなし
-            if (choice.skillData.skillType ==
-                SkillType.Passive)
+            if (skillType == SkillType.Passive)
             {
                 slot.coolTimeText.text = "";
             }
@@ -182,19 +177,25 @@ public class SkillChoiceUI : MonoBehaviour
 
 
         //==================================================
-        // 持続時間
+        // 召喚オブジェクトの寿命
         //==================================================
 
         if (slot.durationText != null)
         {
-            if (variant.duration > 0f)
+            // summonLifetimeは召喚オブジェクト自体の寿命。
+            // 0以下は無制限として扱うため、表示しない。
+            if (skillType == SkillType.Summon &&
+                variant.summonLifetime > 0f)
             {
                 slot.durationText.text =
-                    $"{variant.duration:0.0}秒";
+                    $"{variant.summonLifetime:0.0}秒";
+
+                slot.durationText.gameObject.SetActive(true);
             }
             else
             {
                 slot.durationText.text = "";
+                slot.durationText.gameObject.SetActive(false);
             }
         }
 
@@ -205,14 +206,18 @@ public class SkillChoiceUI : MonoBehaviour
 
         if (slot.spawnCountText != null)
         {
-            if (variant.spawnCount > 0)
+            if (skillType != SkillType.Passive &&
+                variant.spawnCount > 0)
             {
                 slot.spawnCountText.text =
                     $"{variant.spawnCount}";
+
+                slot.spawnCountText.gameObject.SetActive(true);
             }
             else
             {
                 slot.spawnCountText.text = "";
+                slot.spawnCountText.gameObject.SetActive(false);
             }
         }
 
@@ -228,10 +233,7 @@ public class SkillChoiceUI : MonoBehaviour
             int choiceIndex = index;
 
             slot.selectButton.onClick.AddListener(
-                () =>
-                {
-                    OnSelectChoice(choiceIndex);
-                }
+                () => OnSelectChoice(choiceIndex)
             );
         }
     }

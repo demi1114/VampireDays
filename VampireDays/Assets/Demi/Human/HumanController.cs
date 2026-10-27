@@ -1,3 +1,5 @@
+
+using System.Collections;
 using UnityEngine;
 
 public class HumanController : MonoBehaviour
@@ -14,13 +16,24 @@ public class HumanController : MonoBehaviour
     [Header("血液Prefab")]
     public GameObject bloodPrefab;
 
+    [Header("魅了")]
+    [SerializeField]
+    private float defaultCharmDuration = 3f;
+
     /// <summary>
     /// 現在吸血されているか
     /// </summary>
     public bool IsBeingDrained { get; private set; }
 
+    /// <summary>
+    /// 現在魅了されているか
+    /// </summary>
+    public bool IsCharmed { get; private set; }
+
     private Vector3 targetPosition;
     private Vector3 startPosition;
+
+    private Coroutine charmCoroutine;
 
 
     //==================================================
@@ -73,8 +86,8 @@ public class HumanController : MonoBehaviour
 
     private void Move()
     {
-        // 吸血中は移動しない
-        if (IsBeingDrained)
+        // 吸血中・魅了中は移動しない
+        if (IsBeingDrained || IsCharmed)
             return;
 
         Vector3 dir =
@@ -125,12 +138,64 @@ public class HumanController : MonoBehaviour
 
 
     //==================================================
+    // 魅了の瞳
+    //==================================================
+
+    /// <summary>
+    /// 魅了を適用する
+    /// 指定時間、その場で停止する
+    /// </summary>
+    public void ApplyCharm(float duration)
+    {
+        // 吸血中の人間には適用しない
+        if (IsBeingDrained)
+            return;
+
+        // すでに魅了中なら時間をリセットする
+        if (charmCoroutine != null)
+        {
+            StopCoroutine(charmCoroutine);
+        }
+
+        charmCoroutine = StartCoroutine(
+            CharmCoroutine(
+                Mathf.Max(0f, duration)
+            )
+        );
+    }
+
+
+    /// <summary>
+    /// 魅了状態の開始と終了
+    /// </summary>
+    private IEnumerator CharmCoroutine(float duration)
+    {
+        IsCharmed = true;
+
+        // 魅了中は視線判定側で IsCharmed を確認する
+        yield return new WaitForSeconds(duration);
+
+        IsCharmed = false;
+        charmCoroutine = null;
+    }
+
+
+    //==================================================
     // 吸血
     //==================================================
 
     public void BeginDrain()
     {
         IsBeingDrained = true;
+
+        // 吸血開始時に魅了を解除
+        if (charmCoroutine != null)
+        {
+            StopCoroutine(charmCoroutine);
+            charmCoroutine = null;
+        }
+
+        IsCharmed = false;
     }
 
 
@@ -154,32 +219,18 @@ public class HumanController : MonoBehaviour
         if (bloodPrefab == null)
             return;
 
-
-        //==============================================
         // 基本血液量
-        //==============================================
-
         int baseAmount =
             humanData != null
                 ? humanData.bloodAmount
                 : 1;
 
-
-        //==============================================
         // Player取得
-        //==============================================
-
         GameObject player =
             GameObject.FindGameObjectWithTag("Player");
 
-
-        //==============================================
         // 最終血液量
-        //==============================================
-
-        int finalAmount =
-            baseAmount;
-
+        int finalAmount = baseAmount;
 
         if (player != null)
         {
@@ -195,19 +246,13 @@ public class HumanController : MonoBehaviour
             }
         }
 
-
-        //==============================================
         // 血液生成
-        //==============================================
-
         for (int i = 0; i < finalAmount; i++)
         {
             Vector3 offset =
-                Random.insideUnitSphere *
-                0.3f;
+                Random.insideUnitSphere * 0.3f;
 
             offset.y = 0f;
-
 
             Instantiate(
                 bloodPrefab,
@@ -215,7 +260,6 @@ public class HumanController : MonoBehaviour
                 Quaternion.identity
             );
         }
-
 
         Debug.Log(
             $"血液ドロップ : " +
@@ -229,12 +273,7 @@ public class HumanController : MonoBehaviour
     // ドロップ量計算
     //==================================================
 
-    /// <summary>
-    /// ドロップUPスキルを使用して
-    /// 最終的な血液量を計算する
-    /// </summary>
-    private int CalculateDropAmount(
-        int baseAmount)
+    private int CalculateDropAmount(int baseAmount)
     {
         GameObject player =
             GameObject.FindGameObjectWithTag("Player");
@@ -263,7 +302,8 @@ public class HumanController : MonoBehaviour
         if (bat == null)
             return;
 
-        if (IsBeingDrained)
+        // 吸血中・魅了中は視線を変更しない
+        if (IsBeingDrained || IsCharmed)
             return;
 
         Vector3 direction =
