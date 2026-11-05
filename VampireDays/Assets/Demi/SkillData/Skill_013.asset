@@ -20,14 +20,14 @@ MonoBehaviour:
     enhancementType: 0
     icon: {fileID: 21300000, guid: 2cd80edc7f6195d4dae0642d68e5022a, type: 3}
     description: "\u591C\u306E\u3068\u3070\u308A"
-    coolTime: 1
+    coolTime: 20
     spawnCount: 1
     resetChance: 0
     spawnPosition: 0
     forwardDistance: 2
     randomRadius: 3
     summonPrefab: {fileID: 0}
-    magicEffectPrefab: {fileID: 0}
+    magicEffectPrefab: {fileID: 1639214585216581956, guid: fe1fb18ab8b66364f913c34622d36e19, type: 3}
     passiveEffectPrefab: {fileID: 0}
     summonLifetime: 0
     castEffect: {fileID: 0}
@@ -39,4 +39,92 @@ MonoBehaviour:
     moveSpeedMultiplier: 1
     magicCoolTimeReduction: 0
     summonCoolTimeReduction: 0
-  enhancementList: []
+  enhancementList:
+  - enhancementType: 1
+    icon: {fileID: 21300000, guid: 8d44b3111c3081c488b31b6470a4fc29, type: 3}
+    description: 
+    coolTime: 20
+    spawnCount: 1
+    resetChance: 10
+    spawnPosition: 0
+    forwardDistance: 0
+    randomRadius: 0
+    summonPrefab: {fileID: 0}
+    magicEffectPrefab: {fileID: 1639214585216581956, guid: fe1fb18ab8b66364f913c34622d36e19, type: 3}
+    passiveEffectPrefab: {fileID: 0}
+    summonLifetime: 0
+    castEffect: {fileID: 0}
+    castSE: {fileID: 0}
+    destroySE: {fileID: 0}
+    dropMultiplier: 0
+    recoveryMultiplier: 0
+    drainTimeMultiplier: 0
+    moveSpeedMultiplier: 0
+    magicCoolTimeReduction: 0
+    summonCoolTimeReduction: 0
+  - enhancementType: 2
+    icon: {fileID: 21300000, guid: b41062cf9a5035249b39096a219bac41, type: 3}
+    description: 
+    coolTime: 25
+    spawnCount: 1
+    resetChance: 20
+    spawnPosition: 0
+    forwardDistance: 0
+    randomRadius: 0
+    summonPrefab: {fileID: 0}
+    magicEffectPrefab: {fileID: 1639214585216581956, guid: fe1fb18ab8b66364f913c34622d36e19, type: 3}
+    passiveEffectPrefab: {fileID: 0}
+    summonLifetime: 0
+    castEffect: {fileID: 0}
+    castSE: {fileID: 0}
+    destroySE: {fileID: 0}
+    dropMultiplier: 0
+    recoveryMultiplier: 0
+    drainTimeMultiplier: 0
+    moveSpeedMultiplier: 0
+    magicCoolTimeReduction: 0
+    summonCoolTimeReduction: 0
+  - enhancementType: 3
+    icon: {fileID: 21300000, guid: 968185fdea2f8fe48925e7abb967569c, type: 3}
+    description: 
+    coolTime: 15
+    spawnCount: 1
+    resetChance: 0
+    spawnPosition: 0
+    forwardDistance: 0
+    randomRadius: 0
+    summonPrefab: {fileID: 0}
+    magicEffectPrefab: {fileID: 1639214585216581956, guid: fe1fb18ab8b66364f913c34622d36e19, type: 3}
+    passiveEffectPrefab: {fileID: 0}
+    summonLifetime: 0
+    castEffect: {fileID: 0}
+    castSE: {fileID: 0}
+    destroySE: {fileID: 0}
+    dropMultiplier: 0
+    recoveryMultiplier: 0
+    drainTimeMultiplier: 0
+    moveSpeedMultiplier: 0
+    magicCoolTimeReduction: 0
+    summonCoolTimeReduction: 0
+  - enhancementType: 4
+    icon: {fileID: 21300000, guid: a0a5976415603ab4e9947e4592d5e04a, type: 3}
+    description: 
+    coolTime: 25
+    spawnCount: 1
+    resetChance: 40
+    spawnPosition: 0
+    forwardDistance: 0
+    randomRadius: 0
+    summonPrefab: {fileID: 0}
+    magicEffectPrefab: {fileID: 1639214585216581956, guid: fe1fb18ab8b66364f913c34622d36e19, type: 3}
+    passiveEffectPrefab: {fileID: 0}
+    summonLifetime: 0
+    castEffect: {fileID: 0}
+    castSE: {fileID: 0}
+    destroySE: {fileID: 0}
+    dropMultiplier: 0
+    recoveryMultiplier: 0
+    drainTimeMultiplier: 0
+    moveSpeedMultiplier: 0
+    magicCoolTimeReduction: 0
+    summonCoolTimeReduction: 0

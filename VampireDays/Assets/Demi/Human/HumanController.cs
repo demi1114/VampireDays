@@ -1,5 +1,3 @@
-
-using System.Collections;
 using UnityEngine;
 
 public class HumanController : MonoBehaviour
@@ -16,24 +14,21 @@ public class HumanController : MonoBehaviour
     [Header("血液Prefab")]
     public GameObject bloodPrefab;
 
-    [Header("魅了")]
-    [SerializeField]
-    private float defaultCharmDuration = 3f;
-
     /// <summary>
     /// 現在吸血されているか
     /// </summary>
     public bool IsBeingDrained { get; private set; }
 
     /// <summary>
-    /// 現在魅了されているか
+    /// 現在、魅了の瞳に制御されているか
     /// </summary>
-    public bool IsCharmed { get; private set; }
+    public bool IsCharmed => charmEyeSource != null;
 
     private Vector3 targetPosition;
     private Vector3 startPosition;
 
-    private Coroutine charmCoroutine;
+    // 現在、この人間を制御している魅了の瞳
+    private Transform charmEyeSource;
 
 
     //==================================================
@@ -64,6 +59,13 @@ public class HumanController : MonoBehaviour
         }
     }
 
+    private void Update()
+    {
+        // 魅了中ならエフェクトの方向を向く
+        UpdateCharmEyeLook();
+
+        Move();
+    }
 
     private void OnDestroy()
     {
@@ -71,12 +73,6 @@ public class HumanController : MonoBehaviour
         {
             HumanManager.Instance.Unregister(this);
         }
-    }
-
-
-    private void Update()
-    {
-        Move();
     }
 
 
@@ -120,7 +116,6 @@ public class HumanController : MonoBehaviour
         }
     }
 
-
     private void ChooseNewTarget()
     {
         Vector2 random =
@@ -142,41 +137,56 @@ public class HumanController : MonoBehaviour
     //==================================================
 
     /// <summary>
-    /// 魅了を適用する
-    /// 指定時間、その場で停止する
+    /// 魅了の瞳による制御を開始
     /// </summary>
-    public void ApplyCharm(float duration)
+    public void BeginCharmEye(Transform source)
     {
+        if (source == null)
+            return;
+
         // 吸血中の人間には適用しない
         if (IsBeingDrained)
             return;
 
-        // すでに魅了中なら時間をリセットする
-        if (charmCoroutine != null)
-        {
-            StopCoroutine(charmCoroutine);
-        }
+        // すでに別の瞳に制御されている場合は変更しない
+        if (charmEyeSource != null)
+            return;
 
-        charmCoroutine = StartCoroutine(
-            CharmCoroutine(
-                Mathf.Max(0f, duration)
-            )
-        );
+        charmEyeSource = source;
     }
 
+    /// <summary>
+    /// 魅了の瞳による制御を解除
+    /// </summary>
+    public void EndCharmEye(Transform source)
+    {
+        // 現在の制御元と解除元が一致した場合だけ解除
+        if (charmEyeSource != source)
+            return;
+
+        charmEyeSource = null;
+    }
 
     /// <summary>
-    /// 魅了状態の開始と終了
+    /// 魅了の瞳が存在する間、その方向を向く
     /// </summary>
-    private IEnumerator CharmCoroutine(float duration)
+    private void UpdateCharmEyeLook()
     {
-        IsCharmed = true;
+        if (charmEyeSource == null)
+            return;
 
-        // 魅了中は視線判定側で IsCharmed を確認する
-        yield return new WaitForSeconds(duration);
+        Vector3 direction =
+            charmEyeSource.position -
+            transform.position;
 
-        IsCharmed = false;
-        charmCoroutine = null;
+        // 水平方向だけを向く
+        direction.y = 0f;
+
+        if (direction.sqrMagnitude <= 0.001f)
+            return;
+
+        transform.rotation =
+            Quaternion.LookRotation(direction);
     }
 
 
@@ -189,15 +199,8 @@ public class HumanController : MonoBehaviour
         IsBeingDrained = true;
 
         // 吸血開始時に魅了を解除
-        if (charmCoroutine != null)
-        {
-            StopCoroutine(charmCoroutine);
-            charmCoroutine = null;
-        }
-
-        IsCharmed = false;
+        charmEyeSource = null;
     }
-
 
     /// <summary>
     /// 吸血終了
@@ -209,7 +212,6 @@ public class HumanController : MonoBehaviour
 
         Destroy(gameObject);
     }
-
 
     /// <summary>
     /// 人間から血液を生成する

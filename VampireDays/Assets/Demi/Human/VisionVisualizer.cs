@@ -1,4 +1,3 @@
-
 using UnityEngine;
 
 [RequireComponent(typeof(LineRenderer))]
@@ -32,9 +31,9 @@ public class VisionVisualizer : MonoBehaviour
         if (vision == null)
             return;
 
-        // 魅了中・吸血中は視線を非表示にする
-        if (human != null &&
-            (human.IsCharmed || human.IsBeingDrained))
+        // 視線消去中・吸血中は非表示
+        if (vision.IsVisionSuppressed ||
+            (human != null && human.IsBeingDrained))
         {
             line.enabled = false;
             return;
