@@ -30,6 +30,11 @@ public class SkillManager : MonoBehaviour
     [SerializeField]
     private Transform playerTransform;
 
+    [Header("TargetEnemy設定")]
+    [Tooltip("プレイヤーから敵を検索する最大距離")]
+    [SerializeField]
+    private float targetEnemySearchRadius = 20f;
+
     [Header("パッシブエフェクト")]
     [SerializeField]
     private PassiveSkillEffectManager passiveEffectManager;
@@ -901,12 +906,62 @@ public class SkillManager : MonoBehaviour
     // 対象敵位置
     //==================================================
 
+    //==================================================
+    // 対象敵位置
+    //==================================================
+
+    /// <summary>
+    /// プレイヤーに最も近い人間の位置を取得する。
+    /// 吸血中の人間は対象外。
+    /// </summary>
     private Vector3 GetTargetEnemyPosition()
     {
-        // 現段階ではプレイヤー位置を返す。
-        // 対象人間を指定する処理は、必要なスキル側で実装する。
-        return playerTransform != null
+        Vector3 playerPosition = playerTransform != null
             ? playerTransform.position
             : transform.position;
+
+        // シーン内の人間を取得
+        HumanController[] humans =
+            FindObjectsByType<HumanController>(
+                FindObjectsSortMode.None
+            );
+
+        HumanController nearestHuman = null;
+
+        float nearestDistance =
+            targetEnemySearchRadius > 0f
+                ? targetEnemySearchRadius * targetEnemySearchRadius
+                : float.MaxValue;
+
+        foreach (HumanController human in humans)
+        {
+            if (human == null)
+                continue;
+
+            // 吸血中の人間は対象外
+            if (human.IsBeingDrained)
+                continue;
+
+            // プレイヤーからの距離を計算
+            float distance =
+                (human.transform.position - playerPosition)
+                .sqrMagnitude;
+
+            // 検索範囲外なら除外
+            if (distance > nearestDistance)
+                continue;
+
+            nearestDistance = distance;
+            nearestHuman = human;
+        }
+
+        // 対象が見つかった場合
+        if (nearestHuman != null)
+        {
+            return nearestHuman.transform.position;
+        }
+
+        // 対象がいない場合はプレイヤー位置
+        return playerPosition;
     }
 }

@@ -104,8 +104,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LovelyCatSkillObject
   moveSpeed: 5
-  moveRange: 10
+  moveRange: 20
   arrivalDistance: 0.5
-  effectRadius: 3
+  effectRadius: 1
   checkInterval: 0.1
   showDebugLog: 1
