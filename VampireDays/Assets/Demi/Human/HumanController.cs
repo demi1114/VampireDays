@@ -82,8 +82,7 @@ public class HumanController : MonoBehaviour
 
     private void Move()
     {
-        // ‹zŒŒ’†E–£—¹’†‚ÍˆÚ“®‚µ‚È‚¢
-        if (IsBeingDrained || IsCharmed)
+        if (IsBeingDrained || IsCharmed || IsBloodCaged)
             return;
 
         Vector3 dir =
@@ -320,4 +319,35 @@ public class HumanController : MonoBehaviour
         transform.rotation =
             Quaternion.LookRotation(direction);
     }
+
+    // ŒŒ‚ÌŸB‚É‚æ‚éS‘©
+    private Transform bloodCageSource;
+
+    public bool IsBloodCaged => bloodCageSource != null;
+
+    /// <summary>
+    /// ŒŒ‚ÌŸB‚É‚æ‚éS‘©‚ğŠJn
+    /// </summary>
+    public void BeginBloodCage(Transform source)
+    {
+        if (source == null)
+            return;
+
+        // ‚·‚Å‚É•Ê‚ÌŒŒ‚ÌŸB‚ÉS‘©‚³‚ê‚Ä‚¢‚éê‡‚Í–³‹
+        if (bloodCageSource != null)
+            return;
+
+        bloodCageSource = source;
+    }
+
+    /// <summary>
+    /// ŒŒ‚ÌŸB‚É‚æ‚éS‘©‚ğ‰ğœ
+    /// </summary>
+    public void EndBloodCage(Transform source)
+    {
+        // ©•ª‚ğS‘©‚µ‚½ŒŒ‚ÌŸB‚©‚ç‚Ì‰ğœ—v‹‚¾‚¯ó‚¯•t‚¯‚é
+        if (bloodCageSource == source)
+            bloodCageSource = null;
+    }
+
 }

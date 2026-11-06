@@ -31,7 +31,7 @@ public class SkillManager : MonoBehaviour
     private Transform playerTransform;
 
     [Header("TargetEnemy設定")]
-    [Tooltip("プレイヤーから敵を検索する最大距離")]
+    [Tooltip("プレイヤーから敵を検索する最大距離。0以下なら無制限")]
     [SerializeField]
     private float targetEnemySearchRadius = 20f;
 
@@ -653,6 +653,37 @@ public class SkillManager : MonoBehaviour
 
         int spawnCount = Mathf.Max(1, variant.spawnCount);
 
+        // TargetEnemyの場合は複数の対象をランダムに選ぶ
+        if (variant.spawnPosition == SpawnPositionType.TargetEnemy)
+        {
+            List<HumanController> targets =
+                GetRandomTargetHumans(spawnCount);
+
+            foreach (HumanController target in targets)
+            {
+                if (target == null)
+                    continue;
+
+                // 対象の人間の位置に生成
+                GameObject obj = Instantiate(
+                    prefab,
+                    target.transform.position,
+                    Quaternion.identity
+                );
+
+                InitializeSkillObject(obj, skill, target);
+
+                InitializeSkillObjectLifetime(
+                    obj,
+                    skill.skillData.skillType,
+                    variant
+                );
+            }
+
+            return;
+        }
+
+        // TargetEnemy以外は従来どおり
         for (int i = 0; i < spawnCount; i++)
         {
             Vector3 spawnPosition = GetSpawnPosition(variant);
@@ -663,47 +694,166 @@ public class SkillManager : MonoBehaviour
                 Quaternion.identity
             );
 
-            // 個別スキルの初期化。
-            ISkillObject skillObject = obj.GetComponent<ISkillObject>();
+            InitializeSkillObject(obj, skill, null);
 
-            if (skillObject != null)
-            {
-                skillObject.Initialize(skill);
-            }
-            else
-            {
-                Debug.LogWarning(
-                    $"ISkillObjectが付いていません : {obj.name}",
-                    obj
-                );
-            }
-
-            switch (skill.skillData.skillType)
-            {
-                case SkillType.Summon:
-                    // 召喚オブジェクト自体の寿命。
-                    // 0以下なら自動破棄しない。
-                    if (variant.summonLifetime > 0f)
-                    {
-                        Destroy(obj, variant.summonLifetime);
-                    }
-                    break;
-
-                case SkillType.Magic:
-                    // 魔法は召喚用寿命を使用しない。
-                    // Particle Systemの再生終了を監視して破棄する。
-                    MagicEffectLifetime lifetime =
-                        obj.GetComponent<MagicEffectLifetime>();
-
-                    if (lifetime == null)
-                    {
-                        lifetime = obj.AddComponent<MagicEffectLifetime>();
-                    }
-
-                    lifetime.Initialize();
-                    break;
-            }
+            InitializeSkillObjectLifetime(
+                obj,
+                skill.skillData.skillType,
+                variant
+            );
         }
+    }
+
+
+    //==================================================
+    // スキルオブジェクト初期化
+    //==================================================
+
+    /// <summary>
+    /// 生成したスキルオブジェクトを初期化する。
+    /// TargetEnemyの場合は対象の人間も渡す。
+    /// </summary>
+    private void InitializeSkillObject(
+        GameObject obj,
+        RuntimeSkill skill,
+        HumanController target)
+    {
+        if (obj == null)
+            return;
+
+        // 通常のスキル初期化
+        ISkillObject skillObject =
+            obj.GetComponent<ISkillObject>();
+
+        if (skillObject != null)
+        {
+            skillObject.Initialize(skill);
+        }
+        else
+        {
+            Debug.LogWarning(
+                $"ISkillObjectが付いていません : {obj.name}",
+                obj
+            );
+        }
+
+        // 対象を直接受け取るスキルだけ対象を設定
+        ITargetEnemySkillObject targetSkillObject =
+            obj.GetComponent<ITargetEnemySkillObject>();
+
+        if (targetSkillObject != null && target != null)
+        {
+            targetSkillObject.SetTarget(target);
+        }
+    }
+
+
+    //==================================================
+    // スキルオブジェクト寿命
+    //==================================================
+
+    /// <summary>
+    /// スキル種別に応じた寿命処理を設定する。
+    /// </summary>
+    private void InitializeSkillObjectLifetime(
+        GameObject obj,
+        SkillType skillType,
+        SkillVariantData variant)
+    {
+        if (obj == null || variant == null)
+            return;
+
+        switch (skillType)
+        {
+            case SkillType.Summon:
+
+                // 召喚オブジェクト自体の寿命。
+                // 0以下なら自動破棄しない。
+                if (variant.summonLifetime > 0f)
+                {
+                    Destroy(obj, variant.summonLifetime);
+                }
+
+                break;
+
+            case SkillType.Magic:
+
+                // 魔法は召喚用寿命を使用しない。
+                // Particle Systemの再生終了を監視して破棄する。
+                MagicEffectLifetime lifetime =
+                    obj.GetComponent<MagicEffectLifetime>();
+
+                if (lifetime == null)
+                {
+                    lifetime = obj.AddComponent<MagicEffectLifetime>();
+                }
+
+                lifetime.Initialize();
+
+                break;
+        }
+    }
+
+
+    //==================================================
+    // TargetEnemy：ランダム対象取得
+    //==================================================
+
+    /// <summary>
+    /// TargetEnemy用の対象をランダムに取得する。
+    /// 1回の発動内で同じ人間は重複しない。
+    /// </summary>
+    private List<HumanController> GetRandomTargetHumans(int count)
+    {
+        HumanController[] allHumans =
+    FindObjectsByType<HumanController>(FindObjectsSortMode.None);
+
+        List<HumanController> candidates = new();
+
+        Vector3 playerPosition = playerTransform != null
+            ? playerTransform.position
+            : transform.position;
+
+        foreach (HumanController human in allHumans)
+        {
+            if (human == null)
+                continue;
+
+            // 吸血中の人間は対象外
+            if (human.IsBeingDrained)
+                continue;
+
+            // 検索範囲の判定
+            if (targetEnemySearchRadius > 0f)
+            {
+                float distance =
+                    (human.transform.position - playerPosition)
+                    .sqrMagnitude;
+
+                if (distance >
+                    targetEnemySearchRadius * targetEnemySearchRadius)
+                {
+                    continue;
+                }
+            }
+
+            candidates.Add(human);
+        }
+
+        // Fisher-Yatesシャッフル
+        for (int i = 0; i < candidates.Count; i++)
+        {
+            int randomIndex = Random.Range(i, candidates.Count);
+
+            HumanController temp = candidates[i];
+            candidates[i] = candidates[randomIndex];
+            candidates[randomIndex] = temp;
+        }
+
+        // 対象人数が生成数より少なければ対象人数分だけ返す
+        int resultCount = Mathf.Min(count, candidates.Count);
+
+        return candidates.GetRange(0, resultCount);
     }
 
 
@@ -720,9 +870,12 @@ public class SkillManager : MonoBehaviour
         switch (variant.spawnPosition)
         {
             case SpawnPositionType.Player:
+
                 return playerPosition;
 
+
             case SpawnPositionType.Forward:
+
                 if (playerTransform == null)
                     return playerPosition;
 
@@ -730,24 +883,38 @@ public class SkillManager : MonoBehaviour
                        playerTransform.forward *
                        variant.forwardDistance;
 
+
             case SpawnPositionType.RandomAround:
+
                 Vector2 random =
-                    Random.insideUnitCircle * variant.randomRadius;
+                    Random.insideUnitCircle *
+                    variant.randomRadius;
 
                 return playerPosition +
                        new Vector3(random.x, 0f, random.y);
 
+
             case SpawnPositionType.Cursor:
+
                 return GetCursorWorldPosition();
 
+
             case SpawnPositionType.TargetEnemy:
-                return GetTargetEnemyPosition();
+
+                // TargetEnemyはSpawnSkillObject側で複数対象を処理する。
+                return playerPosition;
+
 
             default:
+
                 return playerPosition;
         }
     }
 
+
+    //==================================================
+    // カーソル位置
+    //==================================================
 
     /// <summary>
     /// 新Input Systemからマウス位置を取得し、
@@ -823,6 +990,7 @@ public class SkillManager : MonoBehaviour
         return Mathf.Clamp01(reduction);
     }
 
+
     /// <summary>
     /// 現在のパッシブ効果を反映したCTを計算する。
     /// </summary>
@@ -849,6 +1017,7 @@ public class SkillManager : MonoBehaviour
 
         return baseCoolTime * (1f - reduction);
     }
+
 
     /// <summary>
     /// パッシブの取得・強化時にCTを再計算する。
@@ -899,69 +1068,5 @@ public class SkillManager : MonoBehaviour
                 $"残りCT {skill.currentCoolTime:F2}秒"
             );
         }
-    }
-
-
-    //==================================================
-    // 対象敵位置
-    //==================================================
-
-    //==================================================
-    // 対象敵位置
-    //==================================================
-
-    /// <summary>
-    /// プレイヤーに最も近い人間の位置を取得する。
-    /// 吸血中の人間は対象外。
-    /// </summary>
-    private Vector3 GetTargetEnemyPosition()
-    {
-        Vector3 playerPosition = playerTransform != null
-            ? playerTransform.position
-            : transform.position;
-
-        // シーン内の人間を取得
-        HumanController[] humans =
-            FindObjectsByType<HumanController>(
-                FindObjectsSortMode.None
-            );
-
-        HumanController nearestHuman = null;
-
-        float nearestDistance =
-            targetEnemySearchRadius > 0f
-                ? targetEnemySearchRadius * targetEnemySearchRadius
-                : float.MaxValue;
-
-        foreach (HumanController human in humans)
-        {
-            if (human == null)
-                continue;
-
-            // 吸血中の人間は対象外
-            if (human.IsBeingDrained)
-                continue;
-
-            // プレイヤーからの距離を計算
-            float distance =
-                (human.transform.position - playerPosition)
-                .sqrMagnitude;
-
-            // 検索範囲外なら除外
-            if (distance > nearestDistance)
-                continue;
-
-            nearestDistance = distance;
-            nearestHuman = human;
-        }
-
-        // 対象が見つかった場合
-        if (nearestHuman != null)
-        {
-            return nearestHuman.transform.position;
-        }
-
-        // 対象がいない場合はプレイヤー位置
-        return playerPosition;
     }
 }
