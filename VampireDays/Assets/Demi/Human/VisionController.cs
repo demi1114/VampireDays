@@ -151,49 +151,16 @@ public class VisionController : MonoBehaviour
     }
 
     //==================================================
-    // 視線表示
-    //==================================================
-
-    private void UpdateVisionLine()
-    {
-        if (visionLine == null)
-            return;
-
-        Vector3 origin =
-            transform.position + Vector3.up * lineHeight;
-
-        Vector3 direction = transform.forward;
-        direction.y = 0f;
-
-        if (direction.sqrMagnitude <= 0.001f)
-            return;
-
-        direction.Normalize();
-
-        Vector3 endPosition =
-            origin + direction * viewDistance;
-
-        // 障害物があれば、その位置まで表示
-        if (Physics.Raycast(
-            origin,
-            direction,
-            out RaycastHit hit,
-            viewDistance))
-        {
-            endPosition = hit.point;
-        }
-
-        visionLine.SetPosition(0, origin);
-        visionLine.SetPosition(1, endPosition);
-    }
-
-    //==================================================
     // プレイヤー検知
     //==================================================
 
     private void CheckPlayer()
     {
         IsPlayerVisible = false;
+
+        // 隠れマント中は視線に発見されない
+        if (PlayerCloakSkillObject.IsPlayerHidden)
+            return;
 
         GameObject player =
             GameObject.FindGameObjectWithTag("Player");
