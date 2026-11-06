@@ -22,10 +22,8 @@ public enum EnhancementType
 public enum SpawnPositionType
 {
     Player,        // プレイヤー
-    Cursor,        // カーソル
     RandomAround,  // プレイヤー周囲ランダム
-    TargetEnemy,   // 対象の敵
-    Forward        // プレイヤー前方
+    TargetEnemy   // 対象の敵
 }
 
 /// レアリティ

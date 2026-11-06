@@ -148,11 +148,7 @@ public class SkillDataEditor : Editor
                 .FindPropertyRelative("spawnPosition")
                 .enumValueIndex;
 
-        if (position == SpawnPositionType.Forward)
-        {
-            DrawField(variant, "forwardDistance");
-        }
-        else if (position == SpawnPositionType.RandomAround)
+        if (position == SpawnPositionType.RandomAround)
         {
             DrawField(variant, "randomRadius");
         }

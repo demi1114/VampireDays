@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.InputSystem;
+
 
 /// <summary>
 /// プレイヤーのスキルを管理する。
@@ -873,17 +873,6 @@ public class SkillManager : MonoBehaviour
 
                 return playerPosition;
 
-
-            case SpawnPositionType.Forward:
-
-                if (playerTransform == null)
-                    return playerPosition;
-
-                return playerPosition +
-                       playerTransform.forward *
-                       variant.forwardDistance;
-
-
             case SpawnPositionType.RandomAround:
 
                 Vector2 random =
@@ -892,12 +881,6 @@ public class SkillManager : MonoBehaviour
 
                 return playerPosition +
                        new Vector3(random.x, 0f, random.y);
-
-
-            case SpawnPositionType.Cursor:
-
-                return GetCursorWorldPosition();
-
 
             case SpawnPositionType.TargetEnemy:
 
@@ -910,45 +893,6 @@ public class SkillManager : MonoBehaviour
                 return playerPosition;
         }
     }
-
-
-    //==================================================
-    // カーソル位置
-    //==================================================
-
-    /// <summary>
-    /// 新Input Systemからマウス位置を取得し、
-    /// プレイヤーと同じ高さの地面との交点を返す。
-    /// </summary>
-    private Vector3 GetCursorWorldPosition()
-    {
-        Vector3 fallbackPosition = playerTransform != null
-            ? playerTransform.position
-            : transform.position;
-
-        Camera cam = Camera.main;
-
-        if (cam == null || Mouse.current == null)
-            return fallbackPosition;
-
-        Vector2 mousePosition = Mouse.current.position.ReadValue();
-        Ray ray = cam.ScreenPointToRay(mousePosition);
-
-        float groundY = fallbackPosition.y;
-
-        Plane groundPlane = new Plane(
-            Vector3.up,
-            new Vector3(0f, groundY, 0f)
-        );
-
-        if (groundPlane.Raycast(ray, out float distance))
-        {
-            return ray.GetPoint(distance);
-        }
-
-        return fallbackPosition;
-    }
-
 
     //==================================================
     // パッシブ：魔法・召喚CT短縮

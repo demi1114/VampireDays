@@ -23,7 +23,7 @@ MonoBehaviour:
     coolTime: 3
     spawnCount: 1
     resetChance: 0
-    spawnPosition: 2
+    spawnPosition: 1
     forwardDistance: 2
     randomRadius: 20
     summonPrefab: {fileID: 0}
