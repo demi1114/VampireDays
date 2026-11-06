@@ -15,19 +15,19 @@ MonoBehaviour:
   id: 18
   skillName: "\u30AB\u30FC\u30B9\u30B5\u30A4\u30B9"
   skillType: 1
-  rarity: 1
+  rarity: 0
   normalData:
     enhancementType: 0
     icon: {fileID: 21300000, guid: 6e728db9ca6680441bffa7659bd551b1, type: 3}
     description: "\u591C\u306E\u3068\u3070\u308A"
-    coolTime: 1
-    spawnCount: 1
+    coolTime: 5
+    spawnCount: 5
     resetChance: 0
-    spawnPosition: 0
+    spawnPosition: 1
     forwardDistance: 2
     randomRadius: 3
     summonPrefab: {fileID: 0}
-    magicEffectPrefab: {fileID: 0}
+    magicEffectPrefab: {fileID: 3874635022589376825, guid: e08eb8b3a7510fc4daf4c77e9726ccda, type: 3}
     passiveEffectPrefab: {fileID: 0}
     summonLifetime: 0
     castEffect: {fileID: 0}
