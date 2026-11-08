@@ -577,7 +577,7 @@ public class SkillManager : MonoBehaviour
 
         GameObject prefab = GetSkillPrefab(skill, variant);
 
-        // Prefabが未設定なら発動済みにせず、エラーを出す。
+        // Prefabが未設定なら発動済みにしない
         if (prefab == null)
         {
             Debug.LogError(
@@ -590,15 +590,53 @@ public class SkillManager : MonoBehaviour
 
         Debug.Log($"【スキル発動】{skill.skillData.skillName}");
 
+        // スキル生成
         SpawnSkillObject(skill, variant, prefab);
 
-        // パッシブによるCT短縮を反映する。
-        skill.currentCoolTimeDuration = GetActualCoolTime(skill);
-        skill.currentCoolTime = skill.currentCoolTimeDuration;
+        // パッシブ短縮を反映した通常CT
+        float actualCoolTime = GetActualCoolTime(skill);
+
+        // リセット確率（0～100）
+        float resetChance = Mathf.Clamp(
+            variant.resetChance,
+            0f,
+            100f
+        );
+
+        // リセット判定
+        bool isReset = false;
+
+        if (resetChance >= 100f)
+        {
+            isReset = true;
+        }
+        else if (resetChance > 0f)
+        {
+            isReset =
+                Random.Range(0f, 100f) < resetChance;
+        }
+
+        // 次回CTを設定
+        skill.currentCoolTimeDuration = actualCoolTime;
+
+        if (isReset)
+        {
+            skill.currentCoolTime = 0f;
+
+            Debug.Log(
+                $"【CTリセット成功】{skill.skillData.skillName}"
+            );
+        }
+        else
+        {
+            skill.currentCoolTime = actualCoolTime;
+        }
+
         skill.hasActivated = true;
 
         Debug.Log(
-            $"次回CT : {skill.currentCoolTime:F2}秒"
+            $"次回CT : {skill.currentCoolTime:F2}秒 / " +
+            $"リセット確率 : {resetChance:F1}%"
         );
     }
 
