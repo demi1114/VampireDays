@@ -46,7 +46,7 @@ MonoBehaviour:
     coolTime: 25
     spawnCount: 10
     resetChance: 0
-    spawnPosition: 3
+    spawnPosition: 2
     forwardDistance: 0
     randomRadius: 0
     summonPrefab: {fileID: 0}
@@ -68,7 +68,7 @@ MonoBehaviour:
     coolTime: 15
     spawnCount: 7
     resetChance: 0
-    spawnPosition: 3
+    spawnPosition: 2
     forwardDistance: 0
     randomRadius: 0
     summonPrefab: {fileID: 0}
@@ -90,7 +90,7 @@ MonoBehaviour:
     coolTime: 12
     spawnCount: 5
     resetChance: 0
-    spawnPosition: 3
+    spawnPosition: 2
     forwardDistance: 0
     randomRadius: 0
     summonPrefab: {fileID: 0}
@@ -112,7 +112,7 @@ MonoBehaviour:
     coolTime: 12
     spawnCount: 7
     resetChance: 0
-    spawnPosition: 3
+    spawnPosition: 2
     forwardDistance: 0
     randomRadius: 0
     summonPrefab: {fileID: 0}
